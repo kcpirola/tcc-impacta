@@ -1,0 +1,15 @@
+// Tabela de datas (dimensão) para Time Intelligence.
+// Criar como "Nova Tabela" no Power BI Desktop (Modelagem > Nova Tabela) e depois
+// marcar como "Tabela de Datas" (Ferramentas de Tabela > Marcar como Tabela de Datas),
+// usando a coluna "Date".
+
+DateTable =
+ADDCOLUMNS(
+    CALENDAR(DATE(2024, 1, 1), DATE(2027, 12, 31)),
+    "Ano", YEAR([Date]),
+    "Mês", FORMAT([Date], "MMMM"),
+    "MêsNúmero", MONTH([Date]),
+    "Trimestre", "T" & FORMAT([Date], "Q"),
+    "DiaDaSemana", FORMAT([Date], "dddd"),
+    "AnoMês", FORMAT([Date], "YYYY-MM")
+)

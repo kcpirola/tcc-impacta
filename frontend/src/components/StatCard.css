@@ -1,0 +1,35 @@
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  border-left: 4px solid #90a4ae;
+  min-width: 180px;
+}
+
+.stat-card-title {
+  font-size: 0.85rem;
+  color: #607d8b;
+  text-transform: uppercase;
+}
+
+.stat-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #263238;
+}
+
+.stat-card-safe {
+  border-left-color: #2e7d32;
+}
+
+.stat-card-suspicious {
+  border-left-color: #f9a825;
+}
+
+.stat-card-phishing {
+  border-left-color: #c62828;
+}

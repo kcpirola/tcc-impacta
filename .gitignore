@@ -1,0 +1,133 @@
+# Git Ignore - Sistema de Detecção de Phishing
+
+# Arquivos de Configuração (conter credenciais)
+appsettings.json
+appsettings.Development.json
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+.venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.sln.docstates
+.vs/
+
+# Modelos e Datasets
+ml/models/*.pkl
+ml/models/*.joblib
+ml/data/raw/
+ml/data/processed/
+*.csv
+*.xlsx
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Banco de Dados
+*.db
+*.sqlite
+*.sqlite3
+*.pdb
+
+# Certificados e Chaves
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+
+# Backup
+*.backup
+*.bak
+*.sql.bak
+*.backup.*
+
+# Temporários
+tmp/
+temp/
+*.tmp
+.temp/
+
+# OS
+Thumbs.db
+.DS_Store
+*.swp
+
+# Testes
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Build
+bin/
+obj/
+Release/
+Debug/
+
+# Power BI
+*.pbix
+
+# Específico do Projeto
+.credentials/
+private/
+secrets/
+config/secrets.json
+docker/logs/
+database/backups/
+
+# Dados corporativos sensíveis
+data/emails/
+data/personal/
+extracts/
+
+# Branches locais não sincronizadas
+.git/
+.gitmodules

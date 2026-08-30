@@ -1,0 +1,95 @@
+// ============================================
+// MEDIDAS DAX - Dashboard de Detecção de Phishing
+// ============================================
+// Cole estas medidas na tabela "Emails" (ou em uma tabela de medidas dedicada
+// "_Medidas") após importar as consultas em ../queries/.
+
+// --- Contagens básicas por classificação ---
+
+Total de E-mails = COUNTROWS(Emails)
+
+Total Phishing = CALCULATE([Total de E-mails], Emails[classification] = "phishing")
+
+Total Suspeitos = CALCULATE([Total de E-mails], Emails[classification] = "suspicious")
+
+Total Seguros = CALCULATE([Total de E-mails], Emails[classification] = "safe")
+
+// --- Taxas e percentuais ---
+
+Taxa de Phishing % =
+DIVIDE([Total Phishing], [Total de E-mails], 0)
+
+Taxa de Suspeitos % =
+DIVIDE([Total Suspeitos], [Total de E-mails], 0)
+
+Taxa de Validação % =
+DIVIDE(
+    CALCULATE([Total de E-mails], Emails[is_validated] = TRUE),
+    [Total de E-mails],
+    0
+)
+
+// --- Confiança da classificação ---
+
+Confiança Média =
+AVERAGE(Emails[confidence])
+
+Confiança Média Phishing =
+CALCULATE([Confiança Média], Emails[classification] = "phishing")
+
+// --- Desempenho do modelo (tabela ModelPerformance) ---
+
+Acurácia do Modelo (Atual) =
+CALCULATE(
+    MAX(ModelPerformance[accuracy]),
+    FILTER(
+        ModelPerformance,
+        ModelPerformance[tested_at] = CALCULATE(MAX(ModelPerformance[tested_at]))
+    )
+)
+
+F1-Score do Modelo (Atual) =
+CALCULATE(
+    MAX(ModelPerformance[f1_score]),
+    FILTER(
+        ModelPerformance,
+        ModelPerformance[tested_at] = CALCULATE(MAX(ModelPerformance[tested_at]))
+    )
+)
+
+Meta de Acurácia Atingida =
+IF([Acurácia do Modelo (Atual)] >= 0.95, "✅ Atingida", "❌ Abaixo da meta")
+
+// --- Tempo de processamento (tabela DailyStatistics) ---
+
+Tempo Médio de Processamento (ms) =
+AVERAGE(DailyStatistics[avg_processing_time_ms])
+
+Meta de Performance Atingida =
+IF([Tempo Médio de Processamento (ms)] <= 2000, "✅ Dentro da meta (<2s)", "❌ Acima da meta")
+
+// --- Time Intelligence (requer relacionamento com DateTable) ---
+
+E-mails Phishing (Período Anterior) =
+CALCULATE(
+    [Total Phishing],
+    DATEADD(DateTable[Date], -1, MONTH)
+)
+
+Variação de Phishing vs Período Anterior =
+DIVIDE(
+    [Total Phishing] - [E-mails Phishing (Período Anterior)],
+    [E-mails Phishing (Período Anterior)],
+    0
+)
+
+// --- Remetentes suspeitos ---
+
+Total de Remetentes Suspeitos =
+COUNTROWS(SuspiciousSenders)
+
+Top Remetente Suspeito =
+CALCULATE(
+    MAX(SuspiciousSenders[sender]),
+    TOPN(1, SuspiciousSenders, SuspiciousSenders[phishing_count], DESC)
+)
