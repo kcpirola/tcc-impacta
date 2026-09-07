@@ -72,6 +72,20 @@ def test_falls_back_to_pagination_when_export_missing(tmp_path):
     assert len(saved["submissions"]) == 2
 
 
+def test_falls_back_when_export_forbidden(tmp_path):
+    """Conta não aprovada (403 no /export) -> usa /submissions."""
+    def handler(url, params):
+        if url.endswith("/export"):
+            return FakeResponse(403, {})
+        return FakeResponse(200, {"submissions": [RECORD]} if params.get("page") == 1 else {"submissions": []})
+
+    out = tmp_path / "sting9_export.json"
+    meta = fetch(out, api_base="https://sting9.test/api/v1", token="jwt", session=FakeSession(handler))
+
+    assert meta["endpoint"] == "submissions"
+    assert meta["record_count"] == 1
+
+
 def test_raises_without_token(tmp_path):
     with pytest.raises(ValueError, match="STING9_TOKEN"):
         fetch(tmp_path / "x.json", token="", session=FakeSession(lambda u, p: FakeResponse(200, {})))

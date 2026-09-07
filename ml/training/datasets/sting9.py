@@ -18,10 +18,16 @@ from config import Config
 from training.datasets.base import normalize_frame
 from training.datasets.label_mapping import sting9_mapper
 
+# Chaves toleradas (case-insensitive). O export atual da API entrega
+# `anonymized_content` (texto único, sem subject/sender) + `category` + `type`.
 _RAW_LABEL_KEYS = ("category", "attack_type", "type", "threat_type", "classification", "label")
 _SUBJECT_KEYS = ("subject", "title", "headline")
-_BODY_KEYS = ("content", "body", "text", "message", "raw_text")
+_BODY_KEYS = ("anonymized_content", "anonymizedcontent", "content", "body", "text", "message", "raw_text")
 _SENDER_KEYS = ("sender", "from", "sender_address", "sender_domain", "from_address")
+
+
+def _lower_keys(mapping: dict) -> dict:
+    return {str(k).lower(): v for k, v in mapping.items()}
 
 
 def _first(mapping: dict, keys: tuple[str, ...]) -> str:
@@ -33,14 +39,14 @@ def _first(mapping: dict, keys: tuple[str, ...]) -> str:
 
 
 def _flatten_record(record: dict) -> dict:
-    meta = record.get("metadata") or record.get("meta") or record.get("email_details") or {}
-    if not isinstance(meta, dict):
-        meta = {}
+    rec = _lower_keys(record)
+    meta = rec.get("metadata") or rec.get("meta") or rec.get("email_details") or {}
+    meta = _lower_keys(meta) if isinstance(meta, dict) else {}
     return {
-        "subject": _first(record, _SUBJECT_KEYS) or _first(meta, _SUBJECT_KEYS),
-        "body": _first(record, _BODY_KEYS) or _first(meta, _BODY_KEYS),
-        "sender": _first(record, _SENDER_KEYS) or _first(meta, _SENDER_KEYS),
-        "label": _first(record, _RAW_LABEL_KEYS) or _first(meta, _RAW_LABEL_KEYS),
+        "subject": _first(rec, _SUBJECT_KEYS) or _first(meta, _SUBJECT_KEYS),
+        "body": _first(rec, _BODY_KEYS) or _first(meta, _BODY_KEYS),
+        "sender": _first(rec, _SENDER_KEYS) or _first(meta, _SENDER_KEYS),
+        "label": _first(rec, _RAW_LABEL_KEYS) or _first(meta, _RAW_LABEL_KEYS),
     }
 
 

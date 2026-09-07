@@ -18,18 +18,21 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class TestLabelMapper:
-    def test_sting9_maps_attack_families(self):
+    def test_sting9_maps_real_api_categories(self):
         m = sting9_mapper()
-        assert m.map("Phishing") == "phishing"
-        assert m.map("BEC") == "phishing"
         assert m.map("smishing") == "phishing"
-        assert m.map("Tech Support Scam") == "suspicious"
-        assert m.map("Romance Scam") == "suspicious"
-        assert m.map("Spam") == "suspicious"
+        assert m.map("account_alert") == "phishing"
+        assert m.map("delivery") == "phishing"
+        assert m.map("finance_crypto") == "phishing"
+        assert m.map("spam") == "suspicious"
+        assert m.map("advertisement") == "suspicious"
+        assert m.map("tech_support_scam") == "suspicious"
+        assert m.map("wrong_number_romance_scam") == "suspicious"
 
-    def test_sting9_is_case_insensitive_and_returns_none_for_unknown(self):
+    def test_sting9_is_case_insensitive_and_drops_ambiguous(self):
         m = sting9_mapper()
-        assert m.map("  pHiShInG ") == "phishing"
+        assert m.map("  sMiShInG ") == "phishing"
+        assert m.map("other") is None
         assert m.map("newsletter") is None
 
     def test_kaggle_binary_mapping(self):
@@ -98,10 +101,12 @@ class TestSting9Source:
     def test_flattens_export_and_maps_labels(self):
         df = Sting9Source(FIXTURES / "sting9_export_sample.json").load()
         assert list(df.columns) == CANONICAL_COLUMNS
-        assert len(df) == 4  # 'Totally Unknown Label' descartado
+        assert len(df) == 4  # categoria 'other' descartada
         assert df["label"].value_counts().to_dict() == {"phishing": 2, "suspicious": 2}
-        assert "Account security alert" in set(df["subject"])
-        assert "ceo@company-x.co" in set(df["sender"])
+        # o export real traz só 'anonymized_content' (sem subject/sender)
+        assert (df["subject"] == "").all()
+        assert (df["sender"] == "").all()
+        assert df["body"].str.len().gt(0).all()
 
     def test_missing_export_raises_with_hint(self, tmp_path):
         with pytest.raises(FileNotFoundError, match="fetch_sting9"):

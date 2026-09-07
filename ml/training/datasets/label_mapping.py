@@ -6,28 +6,41 @@ Concentrar os dicionários aqui facilita ajustar o mapeamento quando os dados re
 forem inspecionados (ver "Riscos" no plano).
 
 Contexto:
-- **Sting9**: todas as categorias nativas são maliciosas (Phishing, BEC, Smishing,
-  Tech Support Scam, Romance Scam, Spam) — não há `safe`. Os ataques de engano direto
-  viram `phishing`; golpes/spam de menor severidade viram `suspicious`.
+- **Sting9**: todas as categorias nativas são maliciosas — não há `safe`. As categorias
+  reais da API (`GET /api/v1/stats` -> `submissions_by_category`) estão mapeadas abaixo:
+  engano com intenção de roubo de credencial/pagamento -> `phishing`; golpe/spam de
+  menor severidade -> `suspicious`; `other` é descartado.
+  Rever este mapa após o 1º treino, olhando a matriz de confusão.
+  Obs.: o dataset Sting9 é majoritariamente SMS (smishing), não e-mail corporativo.
 - **Kaggle** (Phishing Email Dataset): binário — `safe` vs `phishing`. É a **única**
   fonte de exemplos `safe`.
 """
 from __future__ import annotations
 
 STING9_LABEL_MAPPING: dict[str, str] = {
+    # -> phishing (engano direto, coleta de credenciais/pagamento)
     "phishing": "phishing",
+    "smishing": "phishing",
+    "sms phishing": "phishing",
+    "account_alert": "phishing",
+    "delivery": "phishing",
+    "finance_crypto": "phishing",
+    "prize_contest": "phishing",
     "spear phishing": "phishing",
     "whaling": "phishing",
     "bec": "phishing",
     "business email compromise": "phishing",
-    "smishing": "phishing",
-    "sms phishing": "phishing",
-    "tech support scam": "suspicious",
-    "tech_support_scam": "suspicious",
-    "romance scam": "suspicious",
-    "romance_scam": "suspicious",
+    # -> suspicious (spam / golpe de menor severidade)
     "spam": "suspicious",
+    "advertisement": "suspicious",
+    "job_advertisement": "suspicious",
+    "loans_credit": "suspicious",
+    "lawsuits_settlements": "suspicious",
+    "tech_support_scam": "suspicious",
+    "wrong_number_romance_scam": "suspicious",
+    "romance scam": "suspicious",
     "scam": "suspicious",
+    # "other" -> não mapeado (descartado)
 }
 
 KAGGLE_LABEL_MAPPING: dict[str, str] = {

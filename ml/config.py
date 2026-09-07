@@ -27,8 +27,8 @@ class Config:
     DATASET_STATS_PATH = DATA_DIR / "dataset_stats.json"
 
     # Fontes de dados (ver ml/data/README.md)
-    # Sting9 Research Initiative — API autenticada em sting9.org.
-    STING9_API_BASE = os.getenv("STING9_API_BASE", "https://sting9.org/api/v1")
+    # Sting9 Research Initiative — API autenticada (host: api.sting9.org, rotas /api/v1/...).
+    STING9_API_BASE = os.getenv("STING9_API_BASE", "https://api.sting9.org/api/v1")
     # JWT obtido no login; STING9_API_KEY é aceito como alias.
     STING9_TOKEN = os.getenv("STING9_TOKEN", "") or os.getenv("STING9_API_KEY", "")
     # Caminho do export JSON já baixado; vazio = usa o data/raw/sting9_export_*.json mais recente.

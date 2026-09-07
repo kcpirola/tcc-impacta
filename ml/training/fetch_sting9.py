@@ -23,8 +23,8 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from config import Config
 
-PAGE_SIZE = 100
-_RATE_SLEEP_SECONDS = 0.2  # ~1000 req/h de folga
+PAGE_SIZE = 1000  # máximo aceito pelo endpoint
+_RATE_SLEEP_SECONDS = 0.2  # folga para o rate limit
 
 
 class _ExportUnavailable(Exception):
@@ -49,32 +49,43 @@ def _as_records(payload) -> list:
     return []
 
 
-def _fetch_export(session, api_base: str) -> list:
-    response = session.get(f"{api_base}/export", params={"format": "json"})
-    if response.status_code in (404, 405, 501):
-        raise _ExportUnavailable()
-    response.raise_for_status()
-    records = _as_records(response.json())
-    if not records:
-        raise _ExportUnavailable()
-    return records
-
-
-def _fetch_paginated(session, api_base: str, max_pages: int | None) -> list:
+def _paginate(
+    session, url: str, base_params: dict, max_pages: int | None, fallback_on: tuple = ()
+) -> list:
     records: list = []
     page = 1
     while max_pages is None or page <= max_pages:
-        response = session.get(
-            f"{api_base}/submissions", params={"page": page, "page_size": PAGE_SIZE}
-        )
+        params = {**base_params, "page": page, "page_size": PAGE_SIZE}
+        response = session.get(url, params=params)
+        if page == 1 and response.status_code in fallback_on:
+            raise _ExportUnavailable()
         response.raise_for_status()
         batch = _as_records(response.json())
         if not batch:
             break
         records.extend(batch)
+        if len(batch) < PAGE_SIZE:
+            break
         page += 1
         time.sleep(_RATE_SLEEP_SECONDS)
     return records
+
+
+def _fetch_export(session, api_base: str, max_pages: int | None, filters: dict) -> list:
+    # 401/403 = conta ainda não aprovada como researcher/partner;
+    # 404/405/501 = endpoint inexistente. Em ambos, cai para /submissions.
+    records = _paginate(
+        session, f"{api_base}/export", {"format": "json", **filters}, max_pages,
+        fallback_on=(401, 403, 404, 405, 501),
+    )
+    if not records:
+        raise _ExportUnavailable()
+    return records
+
+
+def _fetch_paginated(session, api_base: str, max_pages: int | None, filters: dict) -> list:
+    # sem fallback: um 401/403 aqui é problema real de token e deve estourar
+    return _paginate(session, f"{api_base}/submissions", dict(filters), max_pages)
 
 
 def fetch(
@@ -84,8 +95,12 @@ def fetch(
     token: str | None = None,
     session=None,
     max_pages: int | None = None,
+    filters: dict | None = None,
 ) -> dict:
-    """Baixa o dataset e grava `out_path` + `out_path.meta.json`. Retorna o meta."""
+    """Baixa o dataset e grava `out_path` + `out_path.meta.json`. Retorna o meta.
+
+    `filters` (ex.: {"type": "email"}) é repassado como query string ao endpoint.
+    """
     api_base = (api_base or Config.STING9_API_BASE).rstrip("/")
     token = token if token is not None else Config.STING9_TOKEN
     if not token:
@@ -94,15 +109,16 @@ def fetch(
             "faça login e exporte o JWT em STING9_TOKEN antes de rodar este script."
         )
 
+    filters = {k: v for k, v in (filters or {}).items() if v}
     session = session or _make_session(token)
 
     endpoint = "export"
     try:
-        records = _fetch_export(session, api_base)
+        records = _fetch_export(session, api_base, max_pages, filters)
     except _ExportUnavailable:
         print("Endpoint /export indisponível; paginando /submissions ...")
         endpoint = "submissions"
-        records = _fetch_paginated(session, api_base, max_pages)
+        records = _fetch_paginated(session, api_base, max_pages, filters)
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -133,11 +149,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Baixa o dataset Sting9 via API")
     parser.add_argument("--out", default=str(default_out), help="Caminho do JSON de saída")
     parser.add_argument("--api-base", default=None, help="Override de STING9_API_BASE")
-    parser.add_argument("--max-pages", type=int, default=None, help="Limite de páginas (fallback)")
+    parser.add_argument("--max-pages", type=int, default=None, help="Limite de páginas")
+    parser.add_argument("--type", default=None, help="Filtra por tipo (ex.: email, sms)")
+    parser.add_argument("--category", default=None, help="Filtra por categoria")
     args = parser.parse_args()
 
     try:
-        fetch(args.out, api_base=args.api_base, max_pages=args.max_pages)
+        fetch(
+            args.out,
+            api_base=args.api_base,
+            max_pages=args.max_pages,
+            filters={"type": args.type, "category": args.category},
+        )
     except ValueError as exc:
         print(f"\nErro: {exc}", file=sys.stderr)
         raise SystemExit(1)

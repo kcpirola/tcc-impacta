@@ -1,29 +1,34 @@
 {
   "submissions": [
     {
-      "category": "Phishing",
-      "content": "Verify your account now at http://evil.tk before it is locked.",
-      "metadata": { "subject": "Account security alert", "sender": "no-reply@evil.tk" }
+      "type": "sms",
+      "category": "smishing",
+      "anonymized_content": "Your package could not be delivered. Confirm your address at http://x.tld",
+      "language": "en"
     },
     {
-      "category": "BEC",
-      "content": "Please process the wire transfer today, keep it confidential.",
-      "metadata": { "subject": "Urgent wire request", "sender": "ceo@company-x.co" }
+      "type": "email",
+      "category": "account_alert",
+      "anonymized_content": "Unusual sign-in detected. Verify your account now at http://x.tld",
+      "language": "en"
     },
     {
-      "category": "Spam",
-      "content": "Cheap meds online, buy now with a huge discount.",
-      "metadata": { "subject": "Big sale", "sender": "promo@spam.biz" }
+      "type": "sms",
+      "category": "spam",
+      "anonymized_content": "Cheap meds online, buy now with a huge discount!",
+      "language": "en"
     },
     {
-      "category": "Romance Scam",
-      "content": "My dear, I need money to travel and finally meet you.",
-      "metadata": { "subject": "hello my love", "sender": "lonely@hearts.net" }
+      "type": "sms",
+      "category": "wrong_number_romance_scam",
+      "anonymized_content": "Hi, is this Sarah? Sorry, wrong number, but I would love to get to know you.",
+      "language": "en"
     },
     {
-      "category": "Totally Unknown Label",
-      "content": "irrelevant",
-      "metadata": { "subject": "x", "sender": "z@z.com" }
+      "type": "sms",
+      "category": "other",
+      "anonymized_content": "irrelevant text that should be dropped",
+      "language": "en"
     }
   ]
 }
