@@ -1,0 +1,29 @@
+{
+  "submissions": [
+    {
+      "category": "Phishing",
+      "content": "Verify your account now at http://evil.tk before it is locked.",
+      "metadata": { "subject": "Account security alert", "sender": "no-reply@evil.tk" }
+    },
+    {
+      "category": "BEC",
+      "content": "Please process the wire transfer today, keep it confidential.",
+      "metadata": { "subject": "Urgent wire request", "sender": "ceo@company-x.co" }
+    },
+    {
+      "category": "Spam",
+      "content": "Cheap meds online, buy now with a huge discount.",
+      "metadata": { "subject": "Big sale", "sender": "promo@spam.biz" }
+    },
+    {
+      "category": "Romance Scam",
+      "content": "My dear, I need money to travel and finally meet you.",
+      "metadata": { "subject": "hello my love", "sender": "lonely@hearts.net" }
+    },
+    {
+      "category": "Totally Unknown Label",
+      "content": "irrelevant",
+      "metadata": { "subject": "x", "sender": "z@z.com" }
+    }
+  ]
+}

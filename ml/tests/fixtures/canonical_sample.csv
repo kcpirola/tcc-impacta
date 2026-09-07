@@ -1,0 +1,5 @@
+subject,body,sender,label
+Weekly sync,Confirming our weekly sync at 10am in room 3.,alice@corp.com,safe
+Verify now,Click http://login-verify.tk to keep your access.,attacker@login-verify.tk,phishing
+Invoice question,Please confirm the payment details for this invoice.,vendor@new-supplier.co,suspicious
+Team lunch,Lunch on Friday to go over the roadmap?,bob@corp.com,safe
