@@ -8,7 +8,7 @@ combinando features de **TF-IDF** com indicadores heurísticos estruturais.
 
 ```
 ml/
-├── config.py                          # Configurações centralizadas (paths, pesos, thresholds)
+├── config.py                          # Configurações centralizadas (paths, pesos do ensemble, treino)
 ├── requirements.txt                   # Dependências Python
 ├── training/
 │   ├── data_preprocessing.py         # Limpeza e normalização de texto (SRP)
@@ -28,7 +28,7 @@ ml/
 ```
 Texto bruto (subject + body)
    ↓
-EmailPreprocessor.clean()          → remove HTML, URLs, e-mails, normaliza
+EmailPreprocessor.clean()          → remove HTML/URLs/e-mails, normaliza, remove stopwords PT+EN
    ↓
 TfidfVectorizer.transform()        → vetor esparso de até 5000 features (uni+bigramas)
    ↓
@@ -42,7 +42,7 @@ NaiveBayes.predict_proba()  ⟍
                               ⟩ Ensemble ponderado (35% NB + 65% RF)
 RandomForest.predict_proba() ⟋
    ↓
-Aplicação de thresholds de negócio (SUSPICIOUS_THRESHOLD / PHISHING_THRESHOLD)
+argmax da probabilidade ponderada  → classe final (safe / suspicious / phishing)
    ↓
 ClassificationResponse (classification, confidence, indicators, suspiciousUrls, recommendation)
 ```
@@ -164,11 +164,9 @@ Recarrega os modelos do disco após um novo treinamento, sem reiniciar o serviç
 | `ML_SERVICE_PORT` | `5000` | Porta do Flask |
 | `NAIVE_BAYES_WEIGHT` | `0.35` | Peso do NB no ensemble |
 | `RANDOM_FOREST_WEIGHT` | `0.65` | Peso do RF no ensemble |
-| `SUSPICIOUS_THRESHOLD` | `40.0` | % de probabilidade de phishing para marcar como suspeito |
-| `PHISHING_THRESHOLD` | `70.0` | % de probabilidade de phishing para marcar como phishing |
 | `ML_CV_FOLDS` | `10` | Número de folds na validação cruzada |
+| `ML_MIN_SAMPLES_PER_CLASS` | `50` | Mínimo de amostras por classe para permitir o treino |
 | `TFIDF_MAX_FEATURES` | `5000` | Máximo de features do TF-IDF |
-| `RF_N_ESTIMATORS` | `200` | Número de árvores do Random Forest |
 
 ## 🧪 Testes
 
@@ -179,7 +177,7 @@ pytest
 ## 🔗 Integração com o Backend
 
 O backend .NET consome este serviço através de `IEmailClassificationService`
-(`backend/PhishingDetectionAPI/Application/Services/ApplicationServices.cs`), que hoje contém
-uma implementação placeholder. Para integrar de fato, substitua o corpo de
-`EmailClassificationService.ClassifyEmailAsync` por uma chamada HTTP (via Refit ou `HttpClient`)
-para `POST {MlServiceSettings.BaseUrl}/classify`, mapeando a resposta JSON para `ClassificationResponse`.
+(`backend/PhishingDetectionAPI/Application/Services/ApplicationServices.cs`), que já chama
+`POST {MlServiceSettings.BaseUrl}/classify` via cliente Refit (`IMlServiceClient`) e mapeia a
+resposta JSON para `ClassificationResponse`, com fallback conservador (`suspicious`) caso o
+microserviço esteja indisponível.

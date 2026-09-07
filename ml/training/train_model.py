@@ -7,7 +7,9 @@ Uso:
     python -m training.train_model --dataset data/dataset.csv
 """
 import argparse
+import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
@@ -64,13 +66,51 @@ def build_features(df: pd.DataFrame, preprocessor: EmailPreprocessor, extractor:
     return cleaned_texts, numeric_matrix
 
 
+def _resolve_cv_folds(label_counts: pd.Series) -> int:
+    """
+    Valida o dataset e resolve o número de folds da validação cruzada.
+
+    - Aborta se alguma das três classes estiver ausente ou com menos de
+      Config.MIN_SAMPLES_PER_CLASS amostras (k-fold não seria confiável).
+    - Caso contrário usa k = min(Config.CV_FOLDS, menor classe), reduzindo k apenas
+      se a menor classe tiver menos amostras que o k configurado.
+    """
+    present = set(label_counts.index)
+    missing = set(LABEL_ORDER) - present
+    if missing:
+        raise ValueError(
+            f"Dataset não contém as classes: {sorted(missing)}. "
+            f"Gere um dataset real com `python -m training.build_dataset` antes de treinar."
+        )
+
+    min_count = int(label_counts.min())
+    if min_count < Config.MIN_SAMPLES_PER_CLASS:
+        smallest = label_counts.idxmin()
+        raise ValueError(
+            f"Classe menos populada ('{smallest}') tem {min_count} amostra(s); o mínimo "
+            f"para treino confiável é {Config.MIN_SAMPLES_PER_CLASS} por classe. "
+            f"Gere um dataset real com `python -m training.build_dataset` antes de treinar."
+        )
+
+    k = min(Config.CV_FOLDS, min_count)
+    if k < Config.CV_FOLDS:
+        print(
+            f"AVISO: reduzindo k de {Config.CV_FOLDS} para {k} "
+            f"(classe menos populada tem {min_count} amostras)."
+        )
+    return k
+
+
 def train(dataset_path: Path) -> None:
     Config.ensure_directories()
 
     print(f"Carregando dataset de {dataset_path}...")
     df = load_dataset(dataset_path)
     print(f"Total de registros: {len(df)}")
-    print(df["label"].value_counts())
+    label_counts = df["label"].value_counts()
+    print(label_counts)
+
+    cv_folds = _resolve_cv_folds(label_counts)
 
     preprocessor = EmailPreprocessor()
     extractor = PhishingFeatureExtractor()
@@ -100,23 +140,17 @@ def train(dataset_path: Path) -> None:
         stratify=y,
     )
 
-    # Naive Bayes exige valores não-negativos; TF-IDF + MinMax garantem isso
+    # Naive Bayes exige valores não-negativos; TF-IDF + MinMax garantem isso.
+    # Parâmetros padrão do scikit-learn (metodologia 2.4.3).
     print("\nTreinando Naive Bayes...")
     nb_model = MultinomialNB()
     nb_model.fit(X_train, y_train)
-    _cross_validate(nb_model, combined_features, y, "Naive Bayes")
+    nb_cv = _cross_validate(nb_model, combined_features, y, "Naive Bayes", cv_folds)
 
     print("\nTreinando Random Forest...")
-    rf_model = RandomForestClassifier(
-        n_estimators=Config.RF_N_ESTIMATORS,
-        max_depth=None,
-        min_samples_split=5,
-        class_weight="balanced",
-        random_state=Config.RANDOM_STATE,
-        n_jobs=-1,
-    )
+    rf_model = RandomForestClassifier(random_state=Config.RANDOM_STATE, n_jobs=-1)
     rf_model.fit(X_train, y_train)
-    _cross_validate(rf_model, combined_features, y, "Random Forest")
+    rf_cv = _cross_validate(rf_model, combined_features, y, "Random Forest", cv_folds)
 
     print("\nSalvando modelos treinados...")
     joblib.dump(nb_model, Config.NAIVE_BAYES_MODEL_PATH)
@@ -125,18 +159,44 @@ def train(dataset_path: Path) -> None:
     joblib.dump(scaler, Config.FEATURE_SCALER_PATH)
     joblib.dump(label_encoder, Config.MODELS_DIR / "label_encoder.pkl")
 
+    _write_cv_metrics(cv_folds, {"naive_bayes": nb_cv, "random_forest": rf_cv})
+
     print(f"Modelos salvos em: {Config.MODELS_DIR}")
     print("\nTreinamento concluído. Execute evaluate_model.py para métricas detalhadas.")
 
 
-def _cross_validate(model, X, y, model_name: str) -> None:
-    """Executa validação cruzada k-fold e imprime a acurácia média."""
-    cv = StratifiedKFold(n_splits=Config.CV_FOLDS, shuffle=True, random_state=Config.RANDOM_STATE)
+def _cross_validate(model, X, y, model_name: str, n_splits: int) -> dict:
+    """Executa validação cruzada k-fold, imprime e retorna a acurácia por fold."""
+    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=Config.RANDOM_STATE)
     scores = cross_val_score(model, X, y, cv=cv, scoring="accuracy")
-    print(f"{model_name} - Acurácia CV (k={Config.CV_FOLDS}): {scores.mean():.4f} (+/- {scores.std():.4f})")
+    print(f"{model_name} - Acurácia CV (k={n_splits}): {scores.mean():.4f} (+/- {scores.std():.4f})")
+    return {
+        "mean": float(scores.mean()),
+        "std": float(scores.std()),
+        "scores": [float(s) for s in scores],
+    }
+
+
+def _write_cv_metrics(n_splits: int, results: dict) -> None:
+    """Persiste as métricas de validação cruzada em models/cv_metrics.json."""
+    Config.MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "cv_folds": n_splits,
+        "scoring": "accuracy",
+        **results,
+    }
+    path = Config.MODELS_DIR / "cv_metrics.json"
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Métricas de validação cruzada gravadas em: {path}")
 
 
 def main() -> None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
     parser = argparse.ArgumentParser(description="Treina modelos de classificação de phishing")
     parser.add_argument(
         "--dataset",
@@ -145,7 +205,11 @@ def main() -> None:
         help="Caminho para o CSV do dataset (colunas: subject, body, sender, label)",
     )
     args = parser.parse_args()
-    train(Path(args.dataset))
+    try:
+        train(Path(args.dataset))
+    except ValueError as exc:
+        print(f"\nErro: {exc}", file=sys.stderr)
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

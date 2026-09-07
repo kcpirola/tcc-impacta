@@ -57,6 +57,7 @@ dist/
 *.suo
 *.sln.docstates
 .vs/
+.lsp/
 
 # Modelos e Datasets
 ml/models/*.pkl

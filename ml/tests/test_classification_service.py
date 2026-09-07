@@ -111,3 +111,29 @@ class TestEmailClassificationService:
         }
         assert isinstance(result["indicators"], list)
         assert isinstance(result["suspiciousUrls"], list)
+
+    def test_threshold_override_was_removed(self):
+        assert not hasattr(EmailClassificationService, "_apply_threshold_override")
+
+    def test_classification_is_pure_argmax_of_weighted_ensemble(self, trained_service):
+        """A classe final é sempre o argmax da proba ponderada — sem override de limiar."""
+        cases = [
+            ("Confirme seus dados", "Por favor confirme seus dados de acesso no link.", "suporte@parceiro.com"),
+            ("URGENTE: conta suspensa", "Clique aqui: http://192.168.10.5/login-bank", "alert@bank-alert.tk"),
+            ("Reunião de equipe", "Confirmando nossa reunião às 10h.", "joao@empresa.com"),
+        ]
+        for subject, body, sender in cases:
+            cleaned = trained_service._preprocessor.clean(subject, body)
+            extraction = trained_service._extractor.extract(subject, body, sender)
+            tfidf = trained_service._vectorizer.transform([cleaned])
+            numeric = np.array([extraction.as_vector(NUMERIC_FEATURE_NAMES)])
+            scaled = trained_service._scaler.transform(numeric)
+            combined = hstack([tfidf, csr_matrix(scaled)]).tocsr()
+
+            nb = trained_service._nb_model.predict_proba(combined)[0]
+            rf = trained_service._rf_model.predict_proba(combined)[0]
+            weighted = nb * Config.NAIVE_BAYES_WEIGHT + rf * Config.RANDOM_FOREST_WEIGHT
+            expected = trained_service._label_encoder.classes_[int(np.argmax(weighted))]
+
+            result = trained_service.classify(subject, body, sender)
+            assert result["classification"] == expected

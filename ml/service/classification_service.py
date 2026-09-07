@@ -94,11 +94,11 @@ class EmailClassificationService:
             nb_proba * Config.NAIVE_BAYES_WEIGHT + rf_proba * Config.RANDOM_FOREST_WEIGHT
         )
 
+        # Decisão final = argmax da probabilidade ponderada do ensemble (sem override
+        # por limiar de %), fiel à metodologia ("classificação pelo modelo").
         predicted_index = int(np.argmax(combined_proba))
         classification = self._label_encoder.classes_[predicted_index]
         confidence = round(float(combined_proba[predicted_index]) * 100, 2)
-
-        classification = self._apply_threshold_override(classification, combined_proba)
 
         return {
             "classification": classification,
@@ -114,20 +114,6 @@ class EmailClassificationService:
             "suspiciousUrls": extraction.suspicious_urls,
             "recommendation": self._build_recommendation(classification),
         }
-
-    def _apply_threshold_override(self, classification: str, combined_proba: np.ndarray) -> str:
-        """
-        Aplica os limiares de negócio (SUSPICIOUS_THRESHOLD/PHISHING_THRESHOLD) sobre
-        a probabilidade de phishing, garantindo consistência com a política de risco definida.
-        """
-        phishing_index = list(self._label_encoder.classes_).index("phishing")
-        phishing_probability = float(combined_proba[phishing_index]) * 100
-
-        if phishing_probability >= Config.PHISHING_THRESHOLD:
-            return "phishing"
-        if phishing_probability >= Config.SUSPICIOUS_THRESHOLD:
-            return "suspicious" if classification != "phishing" else classification
-        return classification
 
     @staticmethod
     def _build_recommendation(classification: str) -> str:

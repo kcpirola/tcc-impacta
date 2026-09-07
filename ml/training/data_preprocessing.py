@@ -8,6 +8,8 @@ import unicodedata
 
 from bs4 import BeautifulSoup
 
+from training.stopwords import ALL_STOPWORDS
+
 URL_PATTERN = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 MULTIPLE_SPACES_PATTERN = re.compile(r"\s+")
@@ -62,13 +64,27 @@ class EmailPreprocessor:
         """Remove espaços em branco duplicados."""
         return MULTIPLE_SPACES_PATTERN.sub(" ", text).strip()
 
-    def clean(self, subject: str, body: str) -> str:
+    @staticmethod
+    def remove_stopwords(text: str) -> str:
+        """
+        Remove stopwords em português e inglês de um texto já tokenizável por espaço.
+
+        Espera o texto em minúsculas e sem pontuação (etapa final do `clean`). Palavras
+        de conteúdo são preservadas; conectivos e artigos comuns aos dois idiomas são
+        descartados, seguindo a metodologia ("eliminação de stopwords").
+        """
+        if not text:
+            return ""
+        return " ".join(word for word in text.split() if word not in ALL_STOPWORDS)
+
+    def clean(self, subject: str, body: str, remove_stops: bool = True) -> str:
         """
         Executa o pipeline completo de limpeza para classificação textual.
 
         Args:
             subject: Assunto do e-mail.
             body: Corpo do e-mail (pode conter HTML).
+            remove_stops: Se True (padrão), remove stopwords PT+EN ao final do pipeline.
 
         Returns:
             Texto limpo e normalizado, pronto para vetorização TF-IDF.
@@ -81,4 +97,6 @@ class EmailPreprocessor:
         combined = self.to_lowercase(combined)
         combined = NON_ALPHANUMERIC_PATTERN.sub(" ", combined)
         combined = self.remove_extra_whitespace(combined)
+        if remove_stops:
+            combined = self.remove_stopwords(combined)
         return combined
