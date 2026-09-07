@@ -66,6 +66,10 @@ ml/data/raw/
 ml/data/processed/
 *.csv
 *.xlsx
+# Exceções: metadados versionáveis e fixtures de teste (não são dados brutos)
+!ml/data/dataset_stats.json
+!ml/tests/fixtures/
+!ml/tests/fixtures/**
 
 # Logs
 logs/

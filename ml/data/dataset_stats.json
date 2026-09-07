@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-09-07T22:47:19.550419+00:00",
+  "output": "data\\dataset.csv",
+  "total_records": 56077,
+  "removed_duplicates": 19,
+  "label_counts": {
+    "safe": 26419,
+    "suspicious": 21841,
+    "phishing": 7817
+  },
+  "sources": {
+    "kaggle_phishing": {
+      "records": 16942,
+      "label_counts": {
+        "safe": 9125,
+        "phishing": 7817
+      }
+    },
+    "spam_csv": {
+      "records": 39154,
+      "label_counts": {
+        "suspicious": 21842,
+        "safe": 17312
+      }
+    }
+  },
+  "sha256": "35e563ecbe8d3d2ea2cee7c660fbe7ee391c023cef56f467b2a15c49ac70254e"
+}

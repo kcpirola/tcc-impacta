@@ -1,26 +1,29 @@
 # Microserviço de Machine Learning - Detecção de Phishing
 
 Serviço Python responsável por classificar e-mails em **safe**, **suspicious** ou **phishing**,
-usando um ensemble de **Naive Bayes** (triagem inicial) e **Random Forest** (classificação final),
-combinando features de **TF-IDF** com indicadores heurísticos estruturais.
+usando um ensemble ponderado de **Naive Bayes** + **Random Forest** (decisão por argmax da
+probabilidade combinada), sobre features de **TF-IDF** somadas a indicadores heurísticos estruturais.
 
 ## 🏗️ Estrutura
 
 ```
 ml/
-├── config.py                          # Configurações centralizadas (paths, pesos do ensemble, treino)
+├── config.py                          # Configurações centralizadas (paths, pesos do ensemble, treino, fontes)
 ├── requirements.txt                   # Dependências Python
 ├── training/
-│   ├── data_preprocessing.py         # Limpeza e normalização de texto (SRP)
+│   ├── data_preprocessing.py         # Limpeza, normalização e remoção de stopwords (SRP)
 │   ├── feature_extraction.py         # Indicadores heurísticos (URLs, urgência, etc.)
+│   ├── datasets/                     # Loaders plugáveis (sting9, kaggle_phishing, local_csv)
+│   ├── fetch_sting9.py              # Baixa o export Sting9 via API (passo manual)
+│   ├── build_dataset.py            # Consolida as fontes -> data/dataset.csv + stats
 │   ├── train_model.py                # Treinamento com validação cruzada k-fold
 │   ├── evaluate_model.py             # Avaliação de métricas vs. metas do projeto
-│   └── generate_sample_dataset.py    # Dataset sintético para testar o pipeline
+│   └── generate_sample_dataset.py    # Dataset sintético para smoke test
 ├── service/
 │   ├── classification_service.py     # Lógica de inferência do ensemble
 │   └── app.py                        # API Flask consumida pelo backend .NET
-├── models/                            # Modelos treinados (.pkl, não versionados)
-└── data/                              # Datasets (não versionados)
+├── models/                            # Modelos treinados (.pkl, não versionados) + metrics.json
+└── data/                              # Datasets (dataset.csv/raw não versionados; dataset_stats.json sim)
 ```
 
 ## 🧠 Pipeline de Classificação
@@ -74,13 +77,18 @@ venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 ```
 
-### 2. Gerar dataset de teste (opcional, para smoke test)
+### 2. Consolidar o dataset
 
 ```bash
+# smoke test (sem dados reais; o treino vai abortar por poucos dados):
 python -m training.generate_sample_dataset
+
+# dados reais — ver data/README.md para obter Sting9 e Kaggle:
+python -m training.build_dataset --sources sting9,kaggle_phishing --out data/dataset.csv
 ```
 
-Ou coloque seu dataset real (Sting9 + Kaggle) em `data/dataset.csv` — ver [data/README.md](data/README.md).
+`build_dataset` concatena as fontes, remove duplicatas e grava `data/dataset.csv` +
+`data/dataset_stats.json`.
 
 ### 3. Treinar os modelos
 
@@ -88,12 +96,9 @@ Ou coloque seu dataset real (Sting9 + Kaggle) em `data/dataset.csv` — ver [dat
 python -m training.train_model --dataset data/dataset.csv
 ```
 
-Isso gera em `models/`:
-- `naive_bayes_model.pkl`
-- `random_forest_model.pkl`
-- `tfidf_vectorizer.pkl`
-- `feature_scaler.pkl`
-- `label_encoder.pkl`
+Gera em `models/`: `naive_bayes_model.pkl`, `random_forest_model.pkl`, `tfidf_vectorizer.pkl`,
+`feature_scaler.pkl`, `label_encoder.pkl` e `cv_metrics.json`. Aborta se alguma classe tiver
+menos de `ML_MIN_SAMPLES_PER_CLASS` (default 50) amostras.
 
 ### 4. Avaliar os modelos
 
@@ -101,7 +106,8 @@ Isso gera em `models/`:
 python -m training.evaluate_model --dataset data/dataset.csv
 ```
 
-Compara acurácia, precisão, recall e F1-score com as metas do projeto (>95%, >94%, >96%, >95%).
+Compara acurácia, precisão, recall e F1-score (NB, RF e ensemble) com as metas do projeto
+(>95%, >94%, >96%, >95%) e grava `models/metrics.json` + `models/METRICS.md`.
 
 ### 5. Executar o microserviço
 
@@ -167,6 +173,24 @@ Recarrega os modelos do disco após um novo treinamento, sem reiniciar o serviç
 | `ML_CV_FOLDS` | `10` | Número de folds na validação cruzada |
 | `ML_MIN_SAMPLES_PER_CLASS` | `50` | Mínimo de amostras por classe para permitir o treino |
 | `TFIDF_MAX_FEATURES` | `5000` | Máximo de features do TF-IDF |
+| `STING9_API_BASE` | `https://api.sting9.org/api/v1` | Base da API Sting9 |
+| `STING9_TOKEN` / `STING9_API_KEY` | — | JWT do Sting9 (usado por `fetch_sting9`) |
+| `STING9_EXPORT_PATH` | — | Export JSON já baixado (vazio = mais recente em `data/raw/`) |
+| `KAGGLE_DATASET_SLUG` | — | `owner/dataset` do Kaggle para download via CLI |
+
+## 🔁 Reprodutibilidade
+
+Para reproduzir um experimento, registre no TCC:
+
+- **Fonte dos dados**: o arquivo `data/raw/sting9_export_<data>.json` usado (+ seu `.meta.json`)
+  e o CSV do Kaggle; `data/dataset_stats.json` guarda contagens, fontes e o `sha256` do
+  `dataset.csv` consolidado.
+- **Semente**: `ML_RANDOM_STATE` (default 42) — fixa o split 80/20, o `StratifiedKFold` e o
+  Random Forest.
+- **Parâmetros**: NB e RF nos defaults do scikit-learn; versão do `scikit-learn` fica gravada
+  em `models/metrics.json`.
+- **Resultados**: `models/cv_metrics.json` (validação cruzada) e `models/metrics.json` +
+  `models/METRICS.md` (métricas no conjunto de teste).
 
 ## 🧪 Testes
 

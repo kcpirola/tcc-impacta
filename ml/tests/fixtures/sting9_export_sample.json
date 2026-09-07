@@ -1,0 +1,34 @@
+{
+  "submissions": [
+    {
+      "type": "sms",
+      "category": "smishing",
+      "anonymized_content": "Your package could not be delivered. Confirm your address at http://x.tld",
+      "language": "en"
+    },
+    {
+      "type": "email",
+      "category": "account_alert",
+      "anonymized_content": "Unusual sign-in detected. Verify your account now at http://x.tld",
+      "language": "en"
+    },
+    {
+      "type": "sms",
+      "category": "spam",
+      "anonymized_content": "Cheap meds online, buy now with a huge discount!",
+      "language": "en"
+    },
+    {
+      "type": "sms",
+      "category": "wrong_number_romance_scam",
+      "anonymized_content": "Hi, is this Sarah? Sorry, wrong number, but I would love to get to know you.",
+      "language": "en"
+    },
+    {
+      "type": "sms",
+      "category": "other",
+      "anonymized_content": "irrelevant text that should be dropped",
+      "language": "en"
+    }
+  ]
+}

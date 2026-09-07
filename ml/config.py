@@ -14,12 +14,27 @@ class Config:
     # Diretórios
     MODELS_DIR = BASE_DIR / "models"
     DATA_DIR = BASE_DIR / "data"
+    RAW_DATA_DIR = DATA_DIR / "raw"
 
     # Arquivos de modelo
     NAIVE_BAYES_MODEL_PATH = MODELS_DIR / "naive_bayes_model.pkl"
     RANDOM_FOREST_MODEL_PATH = MODELS_DIR / "random_forest_model.pkl"
     TFIDF_VECTORIZER_PATH = MODELS_DIR / "tfidf_vectorizer.pkl"
     FEATURE_SCALER_PATH = MODELS_DIR / "feature_scaler.pkl"
+
+    # Dataset consolidado (saída de training.build_dataset, entrada de train_model/evaluate)
+    PROCESSED_DATASET_PATH = DATA_DIR / "dataset.csv"
+    DATASET_STATS_PATH = DATA_DIR / "dataset_stats.json"
+
+    # Fontes de dados (ver ml/data/README.md)
+    # Sting9 Research Initiative — API autenticada (host: api.sting9.org, rotas /api/v1/...).
+    STING9_API_BASE = os.getenv("STING9_API_BASE", "https://api.sting9.org/api/v1")
+    # JWT obtido no login; STING9_API_KEY é aceito como alias.
+    STING9_TOKEN = os.getenv("STING9_TOKEN", "") or os.getenv("STING9_API_KEY", "")
+    # Caminho do export JSON já baixado; vazio = usa o data/raw/sting9_export_*.json mais recente.
+    STING9_EXPORT_PATH = os.getenv("STING9_EXPORT_PATH", "")
+    # Phishing Email Dataset (Kaggle) — slug owner/dataset para download via CLI.
+    KAGGLE_DATASET_SLUG = os.getenv("KAGGLE_DATASET_SLUG", "")
 
     # Servidor Flask
     HOST = os.getenv("ML_SERVICE_HOST", "0.0.0.0")
@@ -48,3 +63,4 @@ class Config:
         """Garante que os diretórios necessários existam."""
         cls.MODELS_DIR.mkdir(parents=True, exist_ok=True)
         cls.DATA_DIR.mkdir(parents=True, exist_ok=True)
+        cls.RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
