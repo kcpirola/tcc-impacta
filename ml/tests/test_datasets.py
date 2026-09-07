@@ -43,6 +43,13 @@ class TestLabelMapper:
         assert m.map("1") == "phishing"
         assert m.map("ham") == "safe"
 
+    def test_kaggle_mapper_with_suspicious_positive(self):
+        m = kaggle_mapper("suspicious")
+        assert m.map("1") == "suspicious"
+        assert m.map("Phishing Email") == "suspicious"
+        assert m.map("0") == "safe"
+        assert m.map("ham") == "safe"
+
 
 class TestNormalizeFrame:
     def test_adds_missing_columns_and_fills_na(self):
@@ -95,6 +102,12 @@ class TestKagglePhishingSource:
         src = KagglePhishingSource(download=False, dest_dir=tmp_path / "empty")
         with pytest.raises(FileNotFoundError):
             src.load()
+
+    def test_positive_label_suspicious_maps_malicious_rows(self):
+        df = KagglePhishingSource(
+            FIXTURES / "kaggle_sample.csv", download=False, positive_label="suspicious"
+        ).load()
+        assert df["label"].value_counts().to_dict() == {"suspicious": 3, "safe": 3}
 
 
 class TestSting9Source:

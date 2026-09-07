@@ -29,6 +29,10 @@ SOURCE_FACTORIES = {
     "kaggle_phishing": lambda o: KagglePhishingSource(
         o.get("kaggle_csv"), download=o.get("download", False), slug=o.get("kaggle_slug")
     ),
+    # CSV binário de spam tratado como classe intermediária (rótulo 1 -> suspicious).
+    "spam_csv": lambda o: KagglePhishingSource(
+        o.get("spam_csv"), positive_label="suspicious"
+    ),
     "sting9": lambda o: Sting9Source(o.get("sting9_export")),
 }
 
@@ -52,6 +56,7 @@ def build_dataset(
     *,
     local_csv: str | Path | None = None,
     kaggle_csv: str | Path | None = None,
+    spam_csv: str | Path | None = None,
     kaggle_slug: str | None = None,
     sting9_export: str | Path | None = None,
     download: bool = False,
@@ -70,6 +75,7 @@ def build_dataset(
     opts = {
         "local_csv": local_csv,
         "kaggle_csv": kaggle_csv,
+        "spam_csv": spam_csv,
         "kaggle_slug": kaggle_slug,
         "sting9_export": sting9_export,
         "download": download,
@@ -128,7 +134,8 @@ def main() -> None:
     )
     parser.add_argument("--out", default=None, help="CSV de saída (default: data/dataset.csv)")
     parser.add_argument("--local-csv", default=None, help="Caminho do CSV canônico (fonte local_csv)")
-    parser.add_argument("--kaggle-csv", default=None, help="CSV já baixado do Kaggle")
+    parser.add_argument("--kaggle-csv", default=None, help="CSV binário do Kaggle (rótulo 1 -> phishing)")
+    parser.add_argument("--spam-csv", default=None, help="CSV binário de spam (rótulo 1 -> suspicious)")
     parser.add_argument("--kaggle-slug", default=None, help="owner/dataset do Kaggle p/ download")
     parser.add_argument("--sting9-export", default=None, help="JSON do export Sting9 já baixado")
     parser.add_argument(
@@ -143,6 +150,7 @@ def main() -> None:
             args.out,
             local_csv=args.local_csv,
             kaggle_csv=args.kaggle_csv,
+            spam_csv=args.spam_csv,
             kaggle_slug=args.kaggle_slug,
             sting9_export=args.sting9_export,
             download=args.download,

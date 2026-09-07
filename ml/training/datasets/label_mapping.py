@@ -82,5 +82,15 @@ def sting9_mapper() -> LabelMapper:
     return LabelMapper(STING9_LABEL_MAPPING)
 
 
-def kaggle_mapper() -> LabelMapper:
-    return LabelMapper(KAGGLE_LABEL_MAPPING)
+def kaggle_mapper(positive: str = "phishing") -> LabelMapper:
+    """
+    Mapper para CSVs binários. `positive` define a classe do rótulo malicioso (`1`):
+    "phishing" (padrão) ou "suspicious" — útil para tratar um corpus de spam genérico
+    como classe intermediária.
+    """
+    if positive == "phishing":
+        return LabelMapper(KAGGLE_LABEL_MAPPING)
+    if positive not in ("suspicious", "safe"):
+        raise ValueError(f"positive inválido: {positive!r}")
+    remapped = {k: (positive if v == "phishing" else v) for k, v in KAGGLE_LABEL_MAPPING.items()}
+    return LabelMapper(remapped)

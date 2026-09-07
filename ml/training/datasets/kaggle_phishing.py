@@ -45,11 +45,13 @@ class KagglePhishingSource:
         download: bool = False,
         slug: str | None = None,
         dest_dir: str | Path | None = None,
+        positive_label: str = "phishing",
     ):
         self._csv_path = Path(csv_path) if csv_path else None
         self._download = download
         self._slug = slug or Config.KAGGLE_DATASET_SLUG
         self._dest_dir = Path(dest_dir) if dest_dir else (Config.RAW_DATA_DIR / "kaggle")
+        self._positive_label = positive_label
 
     def load(self) -> pd.DataFrame:
         csv_path = self._resolve_csv()
@@ -68,7 +70,10 @@ class KagglePhishingSource:
                 f"Colunas encontradas: {cols}"
             )
         return normalize_frame(
-            df, source=self.name, label_mapper=kaggle_mapper(), column_aliases=column_aliases
+            df,
+            source=self.name,
+            label_mapper=kaggle_mapper(self._positive_label),
+            column_aliases=column_aliases,
         )
 
     def _resolve_csv(self) -> Path:

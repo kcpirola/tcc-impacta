@@ -1,0 +1,175 @@
+{
+  "generated_at": "2026-09-07T23:01:26.539257+00:00",
+  "sklearn_version": "1.9.0",
+  "dataset": {
+    "path": "data\\dataset.csv",
+    "total_records": 56077,
+    "label_counts": {
+      "phishing": 7817,
+      "safe": 26419,
+      "suspicious": 21841
+    },
+    "test_size": 0.2,
+    "cv_folds": 10,
+    "random_state": 42
+  },
+  "ensemble_weights": {
+    "naive_bayes": 0.35,
+    "random_forest": 0.65
+  },
+  "targets": {
+    "accuracy": 0.95,
+    "precision": 0.94,
+    "recall": 0.96,
+    "f1": 0.95
+  },
+  "results": {
+    "naive_bayes": {
+      "accuracy": 0.928049215406562,
+      "precision": 0.9305547472829333,
+      "recall": 0.928049215406562,
+      "f1": 0.9277834589737785,
+      "per_class": {
+        "phishing": {
+          "precision": 0.875,
+          "recall": 0.8324808184143222,
+          "f1": 0.8532110091743119,
+          "support": 1564
+        },
+        "safe": {
+          "precision": 0.9026178010471204,
+          "recall": 0.9788039364118092,
+          "f1": 0.9391683312148175,
+          "support": 5284
+        },
+        "suspicious": {
+          "precision": 0.9842421210605302,
+          "recall": 0.9008699633699634,
+          "f1": 0.9407124073631365,
+          "support": 4368
+        }
+      },
+      "confusion_matrix": [
+        [
+          1302,
+          243,
+          19
+        ],
+        [
+          68,
+          5172,
+          44
+        ],
+        [
+          118,
+          315,
+          3935
+        ]
+      ],
+      "meets_targets": {
+        "accuracy": false,
+        "precision": false,
+        "recall": false,
+        "f1": false
+      }
+    },
+    "random_forest": {
+      "accuracy": 0.9744115549215406,
+      "precision": 0.974622399393384,
+      "recall": 0.9744115549215406,
+      "f1": 0.9738995963087866,
+      "per_class": {
+        "phishing": {
+          "precision": 0.9789855072463768,
+          "recall": 0.8638107416879796,
+          "f1": 0.9177989130434783,
+          "support": 1564
+        },
+        "safe": {
+          "precision": 0.9644232532550889,
+          "recall": 0.9952687358062074,
+          "f1": 0.9796032411288069,
+          "support": 5284
+        },
+        "suspicious": {
+          "precision": 0.9853981291352955,
+          "recall": 0.9887820512820513,
+          "f1": 0.9870871900354246,
+          "support": 4368
+        }
+      },
+      "confusion_matrix": [
+        [
+          1351,
+          169,
+          44
+        ],
+        [
+          5,
+          5259,
+          20
+        ],
+        [
+          24,
+          25,
+          4319
+        ]
+      ],
+      "meets_targets": {
+        "accuracy": true,
+        "precision": true,
+        "recall": true,
+        "f1": true
+      }
+    },
+    "ensemble": {
+      "accuracy": 0.9714693295292439,
+      "precision": 0.9714736997037298,
+      "recall": 0.9714693295292439,
+      "f1": 0.9710787627944364,
+      "per_class": {
+        "phishing": {
+          "precision": 0.9510831586303284,
+          "recall": 0.8702046035805626,
+          "f1": 0.9088480801335559,
+          "support": 1564
+        },
+        "safe": {
+          "precision": 0.9613906678865508,
+          "recall": 0.9943224829674489,
+          "f1": 0.9775793097032283,
+          "support": 5284
+        },
+        "suspicious": {
+          "precision": 0.9909722222222223,
+          "recall": 0.9800824175824175,
+          "f1": 0.9854972375690608,
+          "support": 4368
+        }
+      },
+      "confusion_matrix": [
+        [
+          1361,
+          176,
+          27
+        ],
+        [
+          18,
+          5254,
+          12
+        ],
+        [
+          52,
+          35,
+          4281
+        ]
+      ],
+      "meets_targets": {
+        "accuracy": true,
+        "precision": true,
+        "recall": true,
+        "f1": true
+      }
+    }
+  }
+}

@@ -77,7 +77,25 @@ python -m training.build_dataset --sources kaggle_phishing
 As colunas de texto/rótulo são autodetectadas (`Email Text`/`text`/`body`,
 `Email Type`/`label`/`0-1`).
 
-### 3. CSV local (fallback)
+### 3. CSV de spam como classe intermediária (`spam_csv`)
+
+Mesma leitura do `kaggle_phishing`, mas o rótulo malicioso (`1`) é mapeado para
+**`suspicious`** em vez de `phishing`. Serve para transformar um corpus binário de spam
+(ex.: CEAS 2008) na classe intermediária quando não há uma fonte dedicada de `suspicious`
+(o Sting9 seria a fonte natural).
+
+```bash
+# CEAS 2008 (1 -> suspicious) + um dataset de phishing (1 -> phishing):
+python -m training.build_dataset --sources kaggle_phishing,spam_csv \
+  --kaggle-csv /caminho/phishing_email_dataset.csv \
+  --spam-csv   /caminho/ceas_08.csv \
+  --out data/dataset.csv
+```
+
+Combinação de exemplo já validada: `safe` (rótulo `0` das duas fontes) · `phishing`
+(rótulo `1` do dataset de phishing) · `suspicious` (rótulo `1` do CEAS).
+
+### 4. CSV local (fallback)
 
 Um CSV já no formato canônico (curado à mão). É o default do `build_dataset` e dos
 scripts de treino, para o pipeline rodar sem acesso a Sting9/Kaggle.
