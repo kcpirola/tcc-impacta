@@ -27,20 +27,21 @@ class Config:
     DEBUG = os.getenv("ML_SERVICE_DEBUG", "false").lower() == "true"
 
     # Classificação
-    # Pesos do ensemble entre Naive Bayes (triagem inicial) e Random Forest (decisão final)
+    # Pesos do ensemble entre Naive Bayes e Random Forest. A classificação final é o
+    # argmax da probabilidade ponderada (sem override por limiar de %).
     NAIVE_BAYES_WEIGHT = float(os.getenv("NAIVE_BAYES_WEIGHT", "0.35"))
     RANDOM_FOREST_WEIGHT = float(os.getenv("RANDOM_FOREST_WEIGHT", "0.65"))
 
-    # Limiares de confiança (%) para definir a classificação final
-    SUSPICIOUS_THRESHOLD = float(os.getenv("SUSPICIOUS_THRESHOLD", "40.0"))
-    PHISHING_THRESHOLD = float(os.getenv("PHISHING_THRESHOLD", "70.0"))
-
     # Treinamento
+    # Naive Bayes e Random Forest usam os parâmetros padrão do scikit-learn
+    # (apenas RANDOM_STATE é fixado, para reprodutibilidade — metodologia 2.4.3).
     RANDOM_STATE = int(os.getenv("ML_RANDOM_STATE", "42"))
     TEST_SIZE = float(os.getenv("ML_TEST_SIZE", "0.2"))
     CV_FOLDS = int(os.getenv("ML_CV_FOLDS", "10"))
     TFIDF_MAX_FEATURES = int(os.getenv("TFIDF_MAX_FEATURES", "5000"))
-    RF_N_ESTIMATORS = int(os.getenv("RF_N_ESTIMATORS", "200"))
+    # Mínimo de amostras por classe (safe/suspicious/phishing) para permitir o treino.
+    # Abaixo disso o k-fold(k=10) não é confiável e o treino é abortado.
+    MIN_SAMPLES_PER_CLASS = int(os.getenv("ML_MIN_SAMPLES_PER_CLASS", "50"))
 
     @classmethod
     def ensure_directories(cls):
