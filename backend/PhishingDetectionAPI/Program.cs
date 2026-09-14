@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Refit;
@@ -8,6 +9,7 @@ using PhishingDetectionAPI.Infrastructure.MachineLearning;
 using PhishingDetectionAPI.Infrastructure.Security;
 using PhishingDetectionAPI.Domain.Interfaces;
 using PhishingDetectionAPI.Application.Services;
+using PhishingDetectionAPI.Application.Mapping;
 using Microsoft.OpenApi;
 
 // Configurar Serilog para logging estruturado
@@ -83,6 +85,9 @@ try
                 builder.Configuration.GetValue<double>("MlServiceSettings:Timeout", 30));
         });
     builder.Services.AddScoped<IEmailClassificationService, EmailClassificationService>();
+
+    // Registrar AutoMapper
+    builder.Services.AddAutoMapper(_ => { }, typeof(MappingProfile).Assembly);
 
     // Adicionar Controllers
     builder.Services.AddControllers();
