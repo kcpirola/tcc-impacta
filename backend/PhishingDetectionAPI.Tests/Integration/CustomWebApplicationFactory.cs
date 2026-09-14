@@ -3,7 +3,9 @@ namespace PhishingDetectionAPI.Tests.Integration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using PhishingDetectionAPI.Domain.Entities;
 using PhishingDetectionAPI.Infrastructure.Data;
 using PhishingDetectionAPI.Infrastructure.MachineLearning;
@@ -33,6 +35,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             {
                 services.Remove(dbContextDescriptor);
             }
+
+            services.RemoveAll<IDbContextOptionsConfiguration<PhishingDetectionContext>>();
 
             services.AddDbContext<PhishingDetectionContext>(options =>
                 options.UseInMemoryDatabase(_dbName));

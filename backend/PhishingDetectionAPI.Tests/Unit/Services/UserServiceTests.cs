@@ -1,6 +1,7 @@
 namespace PhishingDetectionAPI.Tests.Unit.Services;
 
 using AutoMapper;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using PhishingDetectionAPI.Application.Mapping;
 using PhishingDetectionAPI.Application.Services;
@@ -15,7 +16,7 @@ public class UserServiceTests
 
     public UserServiceTests()
     {
-        var configuration = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
+        var configuration = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>(), NullLoggerFactory.Instance);
         _mapper = configuration.CreateMapper();
     }
 

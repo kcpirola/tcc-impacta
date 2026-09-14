@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11716.220
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhishingDetectionAPI", "PhishingDetectionAPI\PhishingDetectionAPI.csproj", "{33EEC3F2-C337-D220-AABB-797C475D8F7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhishingDetectionAPI.Tests", "PhishingDetectionAPI.Tests\PhishingDetectionAPI.Tests.csproj", "{864CB9D8-FF5B-69EA-E320-C519281D55A5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33EEC3F2-C337-D220-AABB-797C475D8F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33EEC3F2-C337-D220-AABB-797C475D8F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33EEC3F2-C337-D220-AABB-797C475D8F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33EEC3F2-C337-D220-AABB-797C475D8F7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{864CB9D8-FF5B-69EA-E320-C519281D55A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{864CB9D8-FF5B-69EA-E320-C519281D55A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{864CB9D8-FF5B-69EA-E320-C519281D55A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{864CB9D8-FF5B-69EA-E320-C519281D55A5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CFCDC359-361A-4DC6-ADDA-D9D079074DEA}
+	EndGlobalSection
+EndGlobal
