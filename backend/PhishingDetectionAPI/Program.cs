@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Refit;
 using Serilog;
 using System.Text;
@@ -9,6 +8,7 @@ using PhishingDetectionAPI.Infrastructure.MachineLearning;
 using PhishingDetectionAPI.Infrastructure.Security;
 using PhishingDetectionAPI.Domain.Interfaces;
 using PhishingDetectionAPI.Application.Services;
+using Microsoft.OpenApi;
 
 // Configurar Serilog para logging estruturado
 Log.Logger = new LoggerConfiguration()
@@ -84,9 +84,6 @@ try
         });
     builder.Services.AddScoped<IEmailClassificationService, EmailClassificationService>();
 
-    // Adicionar AutoMapper
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
     // Adicionar Controllers
     builder.Services.AddControllers();
 
@@ -117,28 +114,22 @@ try
             }
         });
 
-        // Adicionar suporte a JWT na documentação Swagger
-        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        var bearerSecurityScheme = new OpenApiSecurityScheme
         {
             Description = "JWT Authorization header using the Bearer scheme",
             Name = "Authorization",
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.ApiKey,
             Scheme = "Bearer"
-        });
+        };
 
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        options.AddSecurityDefinition("Bearer", bearerSecurityScheme);
+
+        options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
         {
             {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                new string[] { }
+                new OpenApiSecuritySchemeReference("Bearer", null, null),
+                new List<string>()
             }
         });
 
