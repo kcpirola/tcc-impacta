@@ -42,7 +42,6 @@ public class AuthenticationService : IAuthenticationService
             throw new InvalidOperationException("Usuário não encontrado ou inativo");
         }
 
-        // Verificar senha (usando BCrypt em produção)
         if (!VerifyPassword(request.Password, user.PasswordHash))
         {
             throw new InvalidOperationException("Senha incorreta");
@@ -151,17 +150,17 @@ public class AuthenticationService : IAuthenticationService
         return tokenHandler.WriteToken(token);
     }
 
-    /// <summary>Verifica se a senha coincide com o hash armazenado.</summary>
-    /// <remarks>
-    /// Em produção, use BCrypt.Net ou similar para verificar hashes.
-    /// Este é apenas um exemplo simples.
-    /// </remarks>
-    private bool VerifyPassword(string password, string hash)
+    /// <summary>Verifica se a senha coincide com o hash BCrypt armazenado.</summary>
+    private static bool VerifyPassword(string password, string hash)
     {
-        // TODO: Implementar verificação com BCrypt
-        // return BCrypt.Net.BCrypt.Verify(password, hash);
-        
-        // Placeholder para exemplo
-        return !string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(hash);
+        try
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hash);
+        }
+        catch (BCrypt.Net.SaltParseException)
+        {
+            // Hash fora do formato BCrypt (ex.: senha gravada em texto puro): recusa o login.
+            return false;
+        }
     }
 }

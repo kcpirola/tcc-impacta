@@ -37,6 +37,24 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task RegisterUserAsync_StoresBcryptHashAndAppliesRoleAndDepartment()
+    {
+        _userRepositoryMock.Setup(r => r.UsernameExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
+        _userRepositoryMock.Setup(r => r.EmailExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
+        User? gravado = null;
+        _userRepositoryMock.Setup(r => r.AddAsync(It.IsAny<User>())).Callback<User>(u => gravado = u);
+        var service = CreateService();
+
+        await service.RegisterUserAsync("ana", "ana@empresa.com", "senha-forte-123", "Ana", "Financeiro", UserRole.Analyst);
+
+        Assert.NotNull(gravado);
+        Assert.NotEqual("senha-forte-123", gravado!.PasswordHash);
+        Assert.True(BCrypt.Net.BCrypt.Verify("senha-forte-123", gravado.PasswordHash));
+        Assert.Equal("Financeiro", gravado.Department);
+        Assert.Equal(UserRole.Analyst, gravado.Role);
+    }
+
+    [Fact]
     public async Task RegisterUserAsync_WithExistingUsername_ThrowsInvalidOperationException()
     {
         _userRepositoryMock.Setup(r => r.UsernameExistsAsync("existing")).ReturnsAsync(true);

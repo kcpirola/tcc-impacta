@@ -23,7 +23,8 @@ public class UserService : IUserService
     }
 
     /// <summary>Registra um novo usuário no sistema.</summary>
-    public async Task<UserDto> RegisterUserAsync(string username, string email, string password, string fullName)
+    public async Task<UserDto> RegisterUserAsync(string username, string email, string password, string fullName,
+        string department = "", UserRole role = UserRole.User)
     {
         if (await _userRepository.UsernameExistsAsync(username))
             throw new InvalidOperationException("Nome de usuário já existe");
@@ -31,14 +32,14 @@ public class UserService : IUserService
         if (await _userRepository.EmailExistsAsync(email))
             throw new InvalidOperationException("E-mail já está registrado");
 
-        // TODO: Usar BCrypt para hash de senha em produção
         var user = new User
         {
             Username = username,
             Email = email,
-            PasswordHash = password, // Em produção: BCrypt.Net.BCrypt.HashPassword(password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             FullName = fullName,
-            Role = UserRole.User,
+            Department = department,
+            Role = role,
             IsActive = true
         };
 

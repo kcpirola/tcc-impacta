@@ -21,12 +21,14 @@ public class AuthenticationServiceTests
 
     private AuthenticationService CreateService() => new(_userRepositoryMock.Object, _jwtSettings);
 
+    private static readonly string SecretHash = BCrypt.Net.BCrypt.HashPassword("secret", workFactor: 4);
+
     private static User CreateActiveUser(string username = "john") => new()
     {
         Id = 1,
         Username = username,
         Email = $"{username}@empresa.com",
-        PasswordHash = "some-hash",
+        PasswordHash = SecretHash,
         FullName = "John Doe",
         Role = UserRole.User,
         IsActive = true
@@ -54,6 +56,31 @@ public class AuthenticationServiceTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.AuthenticateAsync(new LoginRequest { Username = "ghost", Password = "secret" }));
+    }
+
+    [Theory]
+    [InlineData("senha-errada")]
+    [InlineData("Secret")]
+    public async Task AuthenticateAsync_WithWrongPassword_ThrowsInvalidOperationException(string password)
+    {
+        var user = CreateActiveUser();
+        _userRepositoryMock.Setup(r => r.GetByUsernameAsync(user.Username)).ReturnsAsync(user);
+        var service = CreateService();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.AuthenticateAsync(new LoginRequest { Username = user.Username, Password = password }));
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_WithPlainTextStoredPassword_ThrowsInvalidOperationException()
+    {
+        var user = CreateActiveUser();
+        user.PasswordHash = "secret";
+        _userRepositoryMock.Setup(r => r.GetByUsernameAsync(user.Username)).ReturnsAsync(user);
+        var service = CreateService();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.AuthenticateAsync(new LoginRequest { Username = user.Username, Password = "secret" }));
     }
 
     [Fact]

@@ -18,6 +18,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+
+    <!-- Hash de senha -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 
     <!-- Email (MailKit) -->
     <PackageReference Include="MailKit" Version="4.18.0" />
@@ -43,6 +47,7 @@
     <!-- HTTP Client -->
     <PackageReference Include="Refit" Version="15.2.0" />
     <PackageReference Include="Refit.HttpClientFactory" Version="15.2.0" />
+    <PackageReference Include="Refit.Reflection" Version="15.2.0" />
 
     <!-- API Documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
