@@ -144,9 +144,11 @@ function exibirResultado(dados) {
 
   el("recomendacao").textContent = dados.recommendation || "";
 
+  const indicadores = dados.indicators || [];
+  el("rotulo-indicadores").hidden = indicadores.length === 0;
   const lista = el("indicadores");
   lista.textContent = "";
-  for (const indicador of dados.indicators || []) {
+  for (const indicador of indicadores) {
     const item = document.createElement("li");
     item.textContent = indicador.description || indicador.type;
     lista.appendChild(item);

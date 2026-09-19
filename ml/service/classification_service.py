@@ -118,7 +118,9 @@ class EmailClassificationService:
     @staticmethod
     def _build_recommendation(classification: str) -> str:
         recommendations = {
-            "safe": "E-mail seguro, sem sinais de phishing detectados.",
+            # Sem afirmar "nenhum sinal": o extrator de indicadores roda independentemente
+            # do veredito e pode listar sinais (urgência, por exemplo) num e-mail seguro.
+            "safe": "Nenhum indício relevante de phishing. Ainda assim, confira o remetente antes de clicar em links.",
             "suspicious": "E-mail suspeito. Revise os indicadores antes de interagir com links ou anexos.",
             "phishing": "Este e-mail é provavelmente phishing. Não clique em links nem forneça dados.",
         }
