@@ -23,6 +23,11 @@ IP_URL_PATTERN = re.compile(r"https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 SHORTENER_DOMAINS = {"bit.ly", "tinyurl.com", "goo.gl", "t.co", "ow.ly", "is.gd"}
 
 
+def _plural(quantidade: int, singular: str, plural: str) -> str:
+    """Escolhe a forma singular ou plural conforme a quantidade."""
+    return singular if quantidade == 1 else plural
+
+
 @dataclass
 class PhishingIndicatorResult:
     """Representa um indicador de phishing identificado, com seu score de risco."""
@@ -137,7 +142,12 @@ class PhishingFeatureExtractor:
             result.indicators.append(
                 PhishingIndicatorResult(
                     indicator_type="suspicious_url",
-                    description=f"{suspicious_count} URL(s) suspeita(s) detectada(s)",
+                    description=(
+                        f"{suspicious_count} "
+                        f"{_plural(suspicious_count, 'URL', 'URLs')} "
+                        f"{_plural(suspicious_count, '\"suspeita\"', '\"suspeitas\"')} "
+                        f"{_plural(suspicious_count, 'detectada', 'detectadas')}"
+                    ),
                     risk_score=min(100.0, suspicious_count * 25.0),
                 )
             )
@@ -154,7 +164,12 @@ class PhishingFeatureExtractor:
             result.indicators.append(
                 PhishingIndicatorResult(
                     indicator_type="urgent_language",
-                    description=f"{count} termo(s) de urgência detectado(s)",
+                    description=(
+                        f"{count} "
+                        f"{_plural(count, 'termo', 'termos')} "
+                        f'de "urgência" '
+                        f"{_plural(count, 'detectado', 'detectados')}"
+                    ),
                     risk_score=min(100.0, count * 20.0),
                 )
             )
