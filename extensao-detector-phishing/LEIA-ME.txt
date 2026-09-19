@@ -27,7 +27,7 @@ No Chrome fica no canto superior direito. No Edge, no menu da esquerda.
 
 PASSO 4 - CARREGAR A EXTENSAO
 -----------------------------
-Clique no botao "Carregar sem compactacao" ("Load unpacked").
+Clique no botao "Carregar sem compactacao" ou "Carregar expandida" ("Load unpacked").
 Selecione a pasta que voce extraiu no Passo 1 e confirme.
 
 A extensao "Detector de Phishing" deve aparecer na lista.
