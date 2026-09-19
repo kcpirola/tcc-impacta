@@ -17,7 +17,7 @@ using PhishingDetectionAPI.Infrastructure.MachineLearning;
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     public const string TestUsername = "testuser";
-    public const string TestPassword = "any-password";
+    public const string TestPassword = "senha-de-teste-123";
 
     // WebApplicationFactory pode invocar ConfigureWebHost mais de uma vez; um nome fixo
     // garante que todas as chamadas apontem para o mesmo banco InMemory.
@@ -66,7 +66,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         {
             Username = TestUsername,
             Email = "testuser@empresa.com",
-            PasswordHash = "seed-hash",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(TestPassword, workFactor: 4),
             FullName = "Test User",
             Role = UserRole.User,
             IsActive = true

@@ -1,6 +1,7 @@
 namespace PhishingDetectionAPI.Domain.Interfaces;
 
 using PhishingDetectionAPI.Application.Dtos;
+using PhishingDetectionAPI.Domain.Entities;
 
 /// <summary>
 /// Interface para serviço de autenticação.
@@ -76,8 +77,11 @@ public interface IUserService
     /// <param name="email">E-mail do usuário.</param>
     /// <param name="password">Senha do usuário.</param>
     /// <param name="fullName">Nome completo.</param>
+    /// <param name="department">Departamento (opcional).</param>
+    /// <param name="role">Papel do usuário no sistema.</param>
     /// <returns>DTO do usuário criado.</returns>
-    Task<UserDto> RegisterUserAsync(string username, string email, string password, string fullName);
+    Task<UserDto> RegisterUserAsync(string username, string email, string password, string fullName,
+        string department = "", UserRole role = UserRole.User);
 
     /// <summary>Obtém um usuário pelo ID.</summary>
     /// <param name="userId">ID do usuário.</param>

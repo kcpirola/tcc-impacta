@@ -29,6 +29,18 @@ public class AuthControllerTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Login_WithWrongPassword_ReturnsUnauthorized()
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/login", new
+        {
+            username = CustomWebApplicationFactory.TestUsername,
+            password = "senha-errada-qualquer"
+        });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Login_WithNonExistentUser_ReturnsUnauthorized()
     {
         var response = await _client.PostAsJsonAsync("/api/auth/login", new

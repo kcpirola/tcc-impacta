@@ -1,6 +1,7 @@
 namespace PhishingDetectionAPI.Infrastructure.Data;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PhishingDetectionAPI.Domain.Entities;
 
 /// <summary>
@@ -62,7 +63,10 @@ public class PhishingDetectionContext : DbContext
                 .HasMaxLength(100);
 
             entity.Property(e => e.Role)
-                .HasConversion<int>();
+                .HasConversion(TextoMinusculo<UserRole>())
+                .HasMaxLength(50);
+
+            entity.Ignore(e => e.HasLgpdConsent);
 
             entity.HasIndex(e => e.Username).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();
@@ -93,13 +97,15 @@ public class PhishingDetectionContext : DbContext
                 .HasColumnType("text");
 
             entity.Property(e => e.Classification)
-                .HasConversion<int>();
+                .HasConversion(TextoMinusculo<EmailClassification>())
+                .HasMaxLength(50);
 
             entity.Property(e => e.Confidence)
                 .HasPrecision(5, 2);
 
             entity.Property(e => e.UserFeedback)
-                .HasConversion<int?>();
+                .HasConversion(TextoMinusculo<UserFeedback>())
+                .HasMaxLength(50);
 
             entity.HasIndex(e => e.MessageId).IsUnique();
             entity.HasIndex(e => e.Classification);
@@ -195,8 +201,10 @@ public class PhishingDetectionContext : DbContext
                 .IsRequired()
                 .HasMaxLength(45);
 
-            entity.Property(e => e.UserAgent)
-                .HasMaxLength(500);
+            // audit_logs no schema.sql tem só a coluna "timestamp", sem updated_at nem user_agent.
+            entity.Property(e => e.CreatedAt).HasColumnName("timestamp");
+            entity.Ignore(e => e.UpdatedAt);
+            entity.Ignore(e => e.UserAgent);
 
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.Action);
@@ -244,7 +252,8 @@ public class PhishingDetectionContext : DbContext
                 .HasColumnType("text");
 
             entity.Property(e => e.Status)
-                .HasConversion<int>();
+                .HasConversion(TextoMinusculo<DataDeletionStatus>())
+                .HasMaxLength(50);
 
             entity.Property(e => e.Notes)
                 .HasColumnType("text");
@@ -258,6 +267,7 @@ public class PhishingDetectionContext : DbContext
         // Configurar SystemConfig
         modelBuilder.Entity<SystemConfig>(entity =>
         {
+            entity.ToTable("system_config");
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.ConfigKey)
@@ -303,6 +313,7 @@ public class PhishingDetectionContext : DbContext
         // Configurar ModelPerformance
         modelBuilder.Entity<ModelPerformance>(entity =>
         {
+            entity.ToTable("model_performance");
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.ModelName)
@@ -314,7 +325,7 @@ public class PhishingDetectionContext : DbContext
             entity.Property(e => e.Accuracy).HasPrecision(5, 4);
             entity.Property(e => e.Precision).HasPrecision(5, 4);
             entity.Property(e => e.Recall).HasPrecision(5, 4);
-            entity.Property(e => e.F1Score).HasPrecision(5, 4);
+            entity.Property(e => e.F1Score).HasPrecision(5, 4).HasColumnName("f1_score");
             entity.Property(e => e.Notes).HasColumnType("text");
         });
 
@@ -328,5 +339,25 @@ public class PhishingDetectionContext : DbContext
 
             entity.HasIndex(e => e.StatisticDate).IsUnique();
         });
+
+        // O schema.sql não tem as datas herdadas de BaseEntity nestas tabelas;
+        // cada uma já guarda a sua própria data (checked_at, requested_at, tested_at...).
+        foreach (var tipo in new[]
+        {
+            typeof(PhishingIndicator), typeof(UrlDetected), typeof(Attachment), typeof(LgpdConsent),
+            typeof(DataDeletionRequest), typeof(Notification), typeof(ModelPerformance), typeof(DailyStatistics)
+        })
+        {
+            modelBuilder.Entity(tipo).Ignore(nameof(BaseEntity.UpdatedAt));
+        }
+
+        foreach (var tipo in new[] { typeof(UrlDetected), typeof(DataDeletionRequest), typeof(SystemConfig) })
+        {
+            modelBuilder.Entity(tipo).Ignore(nameof(BaseEntity.CreatedAt));
+        }
     }
+
+    /// <summary>Grava enums como texto minúsculo, o formato usado pelo schema.sql ('safe', 'pending'...).</summary>
+    private static ValueConverter<T, string> TextoMinusculo<T>() where T : struct, Enum =>
+        new(v => v.ToString().ToLowerInvariant(), v => Enum.Parse<T>(v, true));
 }

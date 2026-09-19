@@ -30,7 +30,8 @@ public static class InfrastructureExtensions
 
         services.AddDbContext<PhishingDetectionContext>(options =>
             options.UseNpgsql(connectionString,
-                builder => builder.MigrationsAssembly("PhishingDetectionAPI")));
+                builder => builder.MigrationsAssembly("PhishingDetectionAPI"))
+                .UseSnakeCaseNamingConvention());
 
         // Registrar Repositórios
         services.AddScoped<IUserRepository, UserRepository>();
