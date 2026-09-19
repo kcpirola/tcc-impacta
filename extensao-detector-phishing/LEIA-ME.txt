@@ -1,0 +1,98 @@
+DETECTOR DE PHISHING - COMO INSTALAR (5 MINUTOS)
+=================================================
+
+Funciona no Google Chrome e no Microsoft Edge, com Gmail e Outlook Web.
+
+
+PASSO 1 - EXTRAIR A PASTA
+-------------------------
+Clique com o botao direito no arquivo ZIP e escolha "Extrair tudo".
+
+IMPORTANTE: guarde a pasta extraida num lugar definitivo, por exemplo
+"Documentos". Se a pasta for apagada ou movida depois, a extensao para
+de funcionar. Nao deixe na pasta Downloads.
+
+
+PASSO 2 - ABRIR A TELA DE EXTENSOES
+-----------------------------------
+No Chrome: digite  chrome://extensions  na barra de endereco e tecle Enter.
+No Edge:   digite  edge://extensions    na barra de endereco e tecle Enter.
+
+
+PASSO 3 - LIGAR O MODO DO DESENVOLVEDOR
+---------------------------------------
+Nessa tela, ligue a chave "Modo do desenvolvedor".
+No Chrome fica no canto superior direito. No Edge, no menu da esquerda.
+
+
+PASSO 4 - CARREGAR A EXTENSAO
+-----------------------------
+Clique no botao "Carregar sem compactacao" ("Load unpacked").
+Selecione a pasta que voce extraiu no Passo 1 e confirme.
+
+A extensao "Detector de Phishing" deve aparecer na lista.
+
+
+PASSO 5 - DEIXAR O ICONE A VISTA
+--------------------------------
+Clique no icone de peca de quebra-cabeca, na barra do navegador,
+e fixe o "Detector de Phishing" (icone de alfinete).
+
+
+PASSO 6 - CRIAR SUA CONTA
+-------------------------
+Abra um e-mail no Gmail ou no Outlook Web e clique no icone da extensao.
+
+No primeiro acesso, clique em "Criar conta" e preencha seu nome, e-mail da
+empresa, um nome de usuario e uma senha de no minimo 6 caracteres.
+A senha e escolhida por voce: ninguem do TI tem acesso a ela.
+
+Assim que a conta e criada voce ja entra direto, sem digitar de novo.
+Nas proximas vezes, use "Entrar" com o usuario e a senha que voce escolheu.
+
+
+COMO USAR NO DIA A DIA
+======================
+1. Abra o e-mail.
+2. Clique no icone da extensao.
+3. Clique em "Analisar este e-mail".
+
+O resultado aparece em alguns segundos:
+
+  E-mail seguro       - passou nas verificacoes.
+  E-mail suspeito     - tem sinais de alerta. Nao clique em links.
+  Phishing detectado  - nao clique em nada e avise o TI.
+
+Lembre-se: a analise e um apoio, nao uma garantia. Continue desconfiando
+de qualquer e-mail que peca senha, dado bancario ou pagamento urgente.
+
+
+SE ALGO DER ERRADO
+==================
+
+"Nao consegui ler o e-mail da tela"
+   Abra o e-mail por inteiro e tente de novo. Se continuar, use a opcao
+   "Nao achou o e-mail? Cole aqui" e cole remetente, assunto e o texto.
+
+"Nao foi possivel falar com o servidor"
+   Voce precisa estar na rede da empresa (ou conectado na VPN).
+   Se estiver e o erro continuar, avise o TI: o servidor pode estar desligado.
+
+"Usuario ou senha incorretos"
+   Use o usuario e a senha que voce mesmo criou no primeiro acesso.
+   Se nao lembrar a senha, peca ao TI para redefinir.
+
+"Usuario ou e-mail ja cadastrado"
+   Voce ja criou a conta antes. Clique em "Entrar" em vez de "Criar conta".
+
+A extensao sumiu depois de reiniciar o PC
+   A pasta extraida foi movida ou apagada. Extraia de novo e repita
+   os passos 2 a 5.
+
+
+PRIVACIDADE
+===========
+A extensao le apenas o e-mail que voce tem aberto na tela, e somente
+quando voce clica em "Analisar este e-mail". O conteudo vai para o
+servidor da propria empresa, nao para servicos externos. Sua senha nao
+fica guardada: o que fica salvo e um codigo de acesso temporario.
