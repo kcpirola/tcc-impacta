@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Detector de Phishing",
+  "version": "1.0.0",
+  "description": "Analisa o e-mail aberto e indica se e seguro, suspeito ou phishing.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Detector de Phishing"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*",
+        "https://outlook.office.com/*",
+        "https://outlook.office365.com/*",
+        "https://outlook.live.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

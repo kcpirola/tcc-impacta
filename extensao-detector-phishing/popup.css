@@ -1,0 +1,215 @@
+:root {
+  --borda: #d9dce1;
+  --texto: #1c1f23;
+  --suave: #5b6470;
+  --acao: #1f5fd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 340px;
+  margin: 0;
+  padding: 14px;
+  font: 14px/1.45 "Segoe UI", system-ui, sans-serif;
+  color: var(--texto);
+  background: #fff;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--suave);
+}
+
+input,
+textarea {
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 9px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  font: inherit;
+  color: var(--texto);
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  padding: 7px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: #f4f5f7;
+  font: inherit;
+  color: var(--texto);
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e9ebee;
+}
+
+button.principal {
+  width: 100%;
+  border-color: var(--acao);
+  background: var(--acao);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.principal:hover {
+  background: #1a51b4;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.alternar {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--suave);
+  text-align: center;
+}
+
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--acao);
+  text-decoration: underline;
+}
+
+button.link:hover {
+  background: none;
+}
+
+.ajuda {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--suave);
+}
+
+.aviso {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--suave);
+}
+
+.aviso.erro {
+  padding: 9px 10px;
+  border-radius: 6px;
+  background: #fdecec;
+  color: #98232a;
+}
+
+#modo-manual {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--borda);
+}
+
+#modo-manual summary {
+  font-size: 13px;
+  color: var(--suave);
+  cursor: pointer;
+}
+
+#modo-manual > label {
+  margin-top: 10px;
+}
+
+#modo-manual button {
+  width: 100%;
+}
+
+#resultado {
+  margin-top: 14px;
+}
+
+#veredito {
+  padding: 11px 12px;
+  border-left: 4px solid;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#veredito.safe {
+  border-color: #1d7a45;
+  background: #e8f5ed;
+  color: #14532d;
+}
+
+#veredito.suspicious {
+  border-color: #a86a00;
+  background: #fdf3e2;
+  color: #7a4d00;
+}
+
+#veredito.phishing {
+  border-color: #b3261e;
+  background: #fdecec;
+  color: #8c1d18;
+}
+
+#confianca {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--suave);
+}
+
+#recomendacao {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.rotulo {
+  margin: 12px 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--suave);
+}
+
+#indicadores,
+#urls {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+#indicadores li,
+#urls li {
+  margin-bottom: 5px;
+}
+
+#urls li {
+  word-break: break-all;
+  color: #8c1d18;
+}
+
+footer {
+  margin-top: 14px;
+  padding-top: 9px;
+  border-top: 1px solid var(--borda);
+  font-size: 11px;
+  color: var(--suave);
+}

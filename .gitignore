@@ -71,6 +71,9 @@ ml/data/processed/
 !ml/tests/fixtures/
 !ml/tests/fixtures/**
 
+# Pacote gerado pelo criar-zip.ps1 (artefato de build da extensao)
+extensao-detector-phishing/detector-phishing.zip
+
 # Logs
 logs/
 *.log

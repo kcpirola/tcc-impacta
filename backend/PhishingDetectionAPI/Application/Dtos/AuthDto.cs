@@ -1,5 +1,27 @@
 namespace PhishingDetectionAPI.Application.Dtos;
 
+using System.ComponentModel.DataAnnotations;
+
+/// <summary>DTO para autocadastro: o próprio usuário cria a conta e escolhe a senha.</summary>
+/// <remarks>Não há campo de papel de propósito: todo autocadastro entra como "user".</remarks>
+public class CreateUserRequest
+{
+    [Required, MaxLength(100)]
+    public string Username { get; set; } = string.Empty;
+
+    [Required, EmailAddress, MaxLength(255)]
+    public string Email { get; set; } = string.Empty;
+
+    [Required, MaxLength(255)]
+    public string FullName { get; set; } = string.Empty;
+
+    [MaxLength(100)]
+    public string Department { get; set; } = string.Empty;
+
+    [Required, MinLength(6, ErrorMessage = "A senha deve ter pelo menos 6 caracteres.")]
+    public string Password { get; set; } = string.Empty;
+}
+
 /// <summary>
 /// DTO para requisição de login.
 /// </summary>

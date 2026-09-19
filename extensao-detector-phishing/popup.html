@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Detector de Phishing</h1>
+      <button id="sair" type="button" hidden>Sair</button>
+    </header>
+
+    <main>
+      <section id="tela-login" hidden>
+        <p class="ajuda">Entre com seu usuario e senha da empresa.</p>
+        <form id="form-login">
+          <label>
+            Usuario
+            <input id="usuario" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            Senha
+            <input id="senha" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="principal">Entrar</button>
+        </form>
+        <p class="alternar">Primeiro acesso? <button id="ir-cadastro" type="button" class="link">Criar conta</button></p>
+      </section>
+
+      <section id="tela-cadastro" hidden>
+        <p class="ajuda">Crie sua conta. A senha e so sua: ninguem do TI vai conhece-la.</p>
+        <form id="form-cadastro">
+          <label>
+            Nome completo
+            <input id="c-nome" type="text" autocomplete="name" required maxlength="255" />
+          </label>
+          <label>
+            E-mail da empresa
+            <input id="c-email" type="email" autocomplete="email" required maxlength="255" />
+          </label>
+          <label>
+            Departamento
+            <input id="c-departamento" type="text" maxlength="100" placeholder="Opcional" />
+          </label>
+          <label>
+            Usuario
+            <input id="c-usuario" type="text" autocomplete="username" required maxlength="100" />
+          </label>
+          <label>
+            Senha (minimo 6 caracteres)
+            <input id="c-senha" type="password" autocomplete="new-password" required minlength="6" />
+          </label>
+          <label>
+            Repita a senha
+            <input id="c-senha2" type="password" autocomplete="new-password" required minlength="6" />
+          </label>
+          <button type="submit" class="principal">Criar conta</button>
+        </form>
+        <p class="alternar">Ja tem conta? <button id="ir-login" type="button" class="link">Entrar</button></p>
+      </section>
+
+      <section id="tela-analise" hidden>
+        <p class="ajuda" id="saudacao"></p>
+        <button id="analisar" type="button" class="principal">Analisar este e-mail</button>
+
+        <details id="modo-manual">
+          <summary>Nao achou o e-mail? Cole aqui</summary>
+          <label>
+            Remetente
+            <input id="m-remetente" type="text" placeholder="alguem@exemplo.com" />
+          </label>
+          <label>
+            Assunto
+            <input id="m-assunto" type="text" />
+          </label>
+          <label>
+            Texto do e-mail
+            <textarea id="m-corpo" rows="4"></textarea>
+          </label>
+          <button id="analisar-manual" type="button">Analisar texto colado</button>
+        </details>
+      </section>
+
+      <p id="carregando" class="aviso" hidden>Analisando...</p>
+      <p id="erro" class="aviso erro" hidden></p>
+
+      <section id="resultado" hidden>
+        <div id="veredito"></div>
+        <p id="confianca"></p>
+        <p id="recomendacao"></p>
+        <ul id="indicadores"></ul>
+        <div id="urls-bloco" hidden>
+          <p class="rotulo">Links suspeitos</p>
+          <ul id="urls"></ul>
+        </div>
+      </section>
+    </main>
+
+    <footer id="rodape"></footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
