@@ -30,6 +30,7 @@ async function pintarTela() {
   el("tela-cadastro").hidden = logado || !mostrandoCadastro;
   el("tela-analise").hidden = !logado;
   el("sair").hidden = !logado;
+  el("dashboard").hidden = !logado;
   el("rodape").textContent = `Servidor: ${status?.servidor ?? "nao configurado"}`;
 
   if (logado) {
@@ -114,6 +115,10 @@ el("sair").addEventListener("click", async () => {
   await enviarAoFundo({ tipo: "logout" });
   limparAvisos();
   await pintarTela();
+});
+
+el("dashboard").addEventListener("click", () => {
+  chrome.tabs.create({ url: `${PAINEL_URL}/dashboard` });
 });
 
 async function lerEmailDaAba() {

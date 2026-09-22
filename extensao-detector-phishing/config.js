@@ -1,5 +1,5 @@
 // ===================================================================
-//  UNICA LINHA QUE PRECISA SER EDITADA ANTES DE DISTRIBUIR O ZIP
+//  LINHAS QUE PRECISAM SER EDITADAS ANTES DE DISTRIBUIR O ZIP
 // ===================================================================
 //
 //  Troque pelo endereco do computador onde o backend .NET esta rodando.
@@ -16,3 +16,7 @@
 // ===================================================================
 
 const SERVIDOR = "http://192.168.1.100:5000";
+
+// Endereco do painel web (relatorio/dashboard). E o mesmo tipo de endereco
+// acima, mas apontando para onde o frontend React esta publicado.
+const PAINEL_URL = "http://192.168.1.100:3000";
