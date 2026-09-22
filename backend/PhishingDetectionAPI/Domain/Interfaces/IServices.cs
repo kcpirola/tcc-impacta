@@ -44,6 +44,20 @@ public interface IEmailClassificationService
 }
 
 /// <summary>
+/// Interface para serviço de consulta de e-mails já processados.
+/// Responsável por listar e-mails classificados para relatórios e o dashboard.
+/// </summary>
+public interface IEmailQueryService
+{
+    /// <summary>Obtém e-mails já processados por classificação, com paginação.</summary>
+    /// <param name="classification">Classificação a buscar.</param>
+    /// <param name="skip">Número de registros a pular.</param>
+    /// <param name="take">Número de registros a retornar.</param>
+    /// <returns>Lista de e-mails com a classificação especificada.</returns>
+    Task<List<EmailDto>> GetByClassificationAsync(EmailClassification classification, int skip = 0, int take = 10);
+}
+
+/// <summary>
 /// Interface para serviço de integração com e-mail.
 /// Responsável por se conectar ao servidor IMAP e recuperar e-mails.
 /// </summary>

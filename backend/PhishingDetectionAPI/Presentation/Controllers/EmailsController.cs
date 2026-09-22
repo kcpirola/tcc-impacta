@@ -3,6 +3,7 @@ namespace PhishingDetectionAPI.Presentation.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PhishingDetectionAPI.Application.Dtos;
+using PhishingDetectionAPI.Domain.Entities;
 using PhishingDetectionAPI.Domain.Interfaces;
 
 /// <summary>
@@ -17,19 +18,23 @@ public class EmailsController : ControllerBase
 {
     private readonly IEmailClassificationService _classificationService;
     private readonly IEmailIntegrationService _emailIntegrationService;
+    private readonly IEmailQueryService _emailQueryService;
     private readonly IAuditService _auditService;
     private readonly ILogger<EmailsController> _logger;
 
     public EmailsController(
         IEmailClassificationService classificationService,
         IEmailIntegrationService emailIntegrationService,
+        IEmailQueryService emailQueryService,
         IAuditService auditService,
         ILogger<EmailsController> logger)
     {
-        _classificationService = classificationService ?? 
+        _classificationService = classificationService ??
             throw new ArgumentNullException(nameof(classificationService));
-        _emailIntegrationService = emailIntegrationService ?? 
+        _emailIntegrationService = emailIntegrationService ??
             throw new ArgumentNullException(nameof(emailIntegrationService));
+        _emailQueryService = emailQueryService ??
+            throw new ArgumentNullException(nameof(emailQueryService));
         _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -201,16 +206,22 @@ public class EmailsController : ControllerBase
     /// <response code="401">Usuário não autenticado.</response>
     [HttpGet("by-classification/{classification}")]
     [ProducesResponseType(typeof(List<EmailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetByClassification(
-        string classification, 
-        [FromQuery] int skip = 0, 
+        string classification,
+        [FromQuery] int skip = 0,
         [FromQuery] int take = 10)
     {
         try
         {
-            // TODO: Implementar este endpoint com repositório de e-mail
-            return Ok(new List<EmailDto>());
+            if (!Enum.TryParse<EmailClassification>(classification, ignoreCase: true, out var parsedClassification))
+            {
+                return BadRequest(new { message = "Classificação inválida. Use safe, suspicious ou phishing." });
+            }
+
+            var emails = await _emailQueryService.GetByClassificationAsync(parsedClassification, skip, take);
+            return Ok(emails);
         }
         catch (Exception ex)
         {
