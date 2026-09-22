@@ -17,13 +17,13 @@ $arquivos = @(
     "LEIA-ME.txt"
 )
 
-# Confere se a URL aponta para um endereco que nao serve para distribuicao:
+# Confere se as URLs apontam para um endereco que nao serve para distribuicao:
 # o exemplo original, a maquina de desenvolvimento ou o proprio PC do funcionario.
 $config = Get-Content (Join-Path $pasta "config.js") -Raw
-if ($config -match 'const SERVIDOR = "https?://(192\.168\.1\.100|localhost|127\.0\.0\.1)') {
-    Write-Host "ATENCAO: config.js nao aponta para o servidor da empresa." -ForegroundColor Yellow
+if ($config -match 'const (SERVIDOR|PAINEL_URL) = "https?://(192\.168\.1\.100|localhost|127\.0\.0\.1)') {
+    Write-Host "ATENCAO: config.js nao aponta para os enderecos da empresa." -ForegroundColor Yellow
     Write-Host "         Hoje esta assim:" -ForegroundColor Yellow
-    Write-Host "         $(($config -split "`n" | Select-String 'const SERVIDOR').Line.Trim())" -ForegroundColor Yellow
+    Write-Host "         $(($config -split "`n" | Select-String 'const (SERVIDOR|PAINEL_URL)').Line.Trim() -join "`n         ")" -ForegroundColor Yellow
     Write-Host "         192.168.1.100 e o endereco de exemplo, e localhost seria o" -ForegroundColor Yellow
     Write-Host "         PC do proprio funcionario." -ForegroundColor Yellow
     Write-Host ""

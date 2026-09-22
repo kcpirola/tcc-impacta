@@ -3,6 +3,10 @@
   --texto: #1c1f23;
   --suave: #5b6470;
   --acao: #1f5fd0;
+  --acao-escuro: #1a51b4;
+  --acao-claro: #eef3fc;
+  --fundo-input: #f9fafb;
+  --anel-foco: rgba(31, 95, 208, 0.18);
 }
 
 * {
@@ -11,41 +15,105 @@
 
 body {
   width: 340px;
+  max-height: 560px;
   margin: 0;
-  padding: 14px;
-  font: 14px/1.45 "Segoe UI", system-ui, sans-serif;
+  padding: 16px;
+  font: 14px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif;
   color: var(--texto);
   background: #fff;
+  overflow-y: auto;
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--borda);
+  border-radius: 8px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--acao);
 }
 
 header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin: -16px -16px 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--borda);
+  background: linear-gradient(180deg, #fbfcfe, #ffffff);
 }
 
 h1 {
   margin: 0;
   font-size: 15px;
+  letter-spacing: 0.1px;
+}
+
+.header-acoes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-acoes button {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+button.secundario {
+  border-color: var(--acao);
+  color: var(--acao);
+  background: #fff;
+}
+
+button.secundario:hover {
+  background: var(--acao-claro);
 }
 
 label {
   display: block;
-  margin-bottom: 10px;
-  font-size: 13px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
   color: var(--suave);
 }
 
 input,
 textarea {
   width: 100%;
-  margin-top: 4px;
-  padding: 7px 9px;
+  margin-top: 5px;
+  padding: 8px 10px;
   border: 1px solid var(--borda);
-  border-radius: 6px;
+  border-radius: 8px;
+  background: var(--fundo-input);
   font: inherit;
+  font-weight: 400;
   color: var(--texto);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+input:hover,
+textarea:hover {
+  border-color: #c3c8d1;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--acao);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--anel-foco);
 }
 
 textarea {
@@ -53,38 +121,49 @@ textarea {
 }
 
 button {
-  padding: 7px 12px;
+  padding: 8px 12px;
   border: 1px solid var(--borda);
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f4f5f7;
   font: inherit;
   color: var(--texto);
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
 }
 
 button:hover {
   background: #e9ebee;
 }
 
+button:active {
+  transform: translateY(1px);
+}
+
 button.principal {
   width: 100%;
+  padding: 10px 12px;
   border-color: var(--acao);
   background: var(--acao);
   color: #fff;
   font-weight: 600;
+  box-shadow: 0 1px 2px rgba(31, 95, 208, 0.25);
 }
 
 button.principal:hover {
-  background: #1a51b4;
+  background: var(--acao-escuro);
+  box-shadow: 0 2px 6px rgba(31, 95, 208, 0.3);
 }
 
 button:disabled {
   opacity: 0.6;
   cursor: default;
+  transform: none;
 }
 
 .alternar {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--borda);
   font-size: 13px;
   color: var(--suave);
   text-align: center;
@@ -103,9 +182,13 @@ button.link:hover {
 }
 
 .ajuda {
-  margin: 0 0 10px;
-  font-size: 13px;
-  color: var(--suave);
+  margin: 0 0 14px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: var(--acao-claro);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #2c3a52;
 }
 
 .aviso {

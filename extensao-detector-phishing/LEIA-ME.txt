@@ -67,6 +67,14 @@ Lembre-se: a analise e um apoio, nao uma garantia. Continue desconfiando
 de qualquer e-mail que peca senha, dado bancario ou pagamento urgente.
 
 
+PAINEL DE RELATORIOS (DASHBOARD)
+=================================
+Com a conta logada, aparece um botao "Dashboard" no topo da extensao.
+Ao clicar, abre em uma nova aba o painel web com o resumo dos e-mails
+analisados (seguros, suspeitos e phishing). Na primeira vez, o painel
+pode pedir para voce entrar de novo com o mesmo usuario e senha.
+
+
 SE ALGO DER ERRADO
 ==================
 
