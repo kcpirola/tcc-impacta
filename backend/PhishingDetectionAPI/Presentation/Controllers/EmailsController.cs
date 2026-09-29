@@ -197,6 +197,27 @@ public class EmailsController : ControllerBase
         }
     }
 
+    /// <summary>Conta os e-mails já analisados em cada classificação.</summary>
+    /// <returns>Totais de seguros, suspeitos e phishing.</returns>
+    /// <response code="200">Totais calculados.</response>
+    /// <response code="401">Usuário não autenticado.</response>
+    [HttpGet("statistics")]
+    [ProducesResponseType(typeof(EmailStatisticsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetStatistics()
+    {
+        try
+        {
+            return Ok(await _emailQueryService.GetStatisticsAsync());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao calcular as estatísticas de e-mails");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "Erro ao calcular estatísticas" });
+        }
+    }
+
     /// <summary>Busca e-mails por classificação.</summary>
     /// <param name="classification">Classificação a buscar (safe, suspicious, phishing).</param>
     /// <param name="skip">Número de registros a pular (paginação).</param>

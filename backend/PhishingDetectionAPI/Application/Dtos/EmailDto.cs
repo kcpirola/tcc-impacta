@@ -95,6 +95,18 @@ public class EmailDto
 /// <summary>
 /// DTO para enviar feedback sobre classificação.
 /// </summary>
+/// <summary>Totais de e-mails por classificação, para os cartões do dashboard.</summary>
+public class EmailStatisticsDto
+{
+    public int Safe { get; set; }
+
+    public int Suspicious { get; set; }
+
+    public int Phishing { get; set; }
+
+    public int Total => Safe + Suspicious + Phishing;
+}
+
 public class EmailFeedbackRequest
 {
     /// <summary>ID do e-mail.</summary>

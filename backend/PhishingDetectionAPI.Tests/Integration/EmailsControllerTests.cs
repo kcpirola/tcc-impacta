@@ -20,11 +20,11 @@ public class EmailsControllerTests : IClassFixture<CustomWebApplicationFactory>
         _client = factory.CreateClient();
     }
 
-    private void SeedEmail(string messageId, EmailClassification classification, UserFeedback? feedback = null)
+    private Email SeedEmail(string messageId, EmailClassification classification, UserFeedback? feedback = null)
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<PhishingDetectionContext>();
-        db.Emails.Add(new Email
+        var email = new Email
         {
             MessageId = messageId,
             Subject = $"Assunto {messageId}",
@@ -34,8 +34,10 @@ public class EmailsControllerTests : IClassFixture<CustomWebApplicationFactory>
             Classification = classification,
             Confidence = 90m,
             UserFeedback = feedback
-        });
+        };
+        db.Emails.Add(email);
         db.SaveChanges();
+        return email;
     }
 
     private async Task<string> GetAuthTokenAsync()
@@ -47,6 +49,48 @@ public class EmailsControllerTests : IClassFixture<CustomWebApplicationFactory>
         });
         var body = await response.Content.ReadFromJsonAsync<JsonElement>();
         return body.GetProperty("token").GetString()!;
+    }
+
+    private async Task<JsonElement> ChamarAsync(HttpMethod metodo, string url, object? corpo = null)
+    {
+        using var requisicao = new HttpRequestMessage(metodo, url)
+        {
+            Headers = { Authorization = new AuthenticationHeaderValue("Bearer", await GetAuthTokenAsync()) }
+        };
+        if (corpo != null) requisicao.Content = JsonContent.Create(corpo);
+
+        var resposta = await _client.SendAsync(requisicao);
+        resposta.EnsureSuccessStatusCode();
+        return await resposta.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
+    [Fact]
+    public async Task Classify_SavesEmail_SoStatisticsAndListingSeeIt()
+    {
+        var antes = (await ChamarAsync(HttpMethod.Get, "/api/emails/statistics")).GetProperty("safe").GetInt32();
+        var assunto = $"Ata da reunião {Guid.NewGuid():N}";
+
+        await ChamarAsync(HttpMethod.Post, "/api/emails/classify", new
+        {
+            subject = assunto,
+            body = "Segue a ata da reunião de ontem, com os próximos passos.",
+            sender = "colega@empresa.com"
+        });
+
+        var depois = (await ChamarAsync(HttpMethod.Get, "/api/emails/statistics")).GetProperty("safe").GetInt32();
+        Assert.Equal(antes + 1, depois);
+
+        var listagem = await ChamarAsync(HttpMethod.Get, "/api/emails/by-classification/safe?skip=0&take=100");
+        var assuntos = listagem.EnumerateArray().Select(e => e.GetProperty("subject").GetString()).ToList();
+        Assert.Contains(assunto, assuntos);
+    }
+
+    [Fact]
+    public async Task Statistics_WithoutToken_ReturnsUnauthorized()
+    {
+        var resposta = await _client.GetAsync("/api/emails/statistics");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, resposta.StatusCode);
     }
 
     [Fact]
@@ -123,11 +167,12 @@ public class EmailsControllerTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetByClassification_WithValidToken_ReturnsOnlyMatchingEmails()
     {
         SeedEmail("msg-phishing-1", EmailClassification.Phishing, UserFeedback.Correct);
-        SeedEmail("msg-safe-1", EmailClassification.Safe);
-        SeedEmail("msg-safe-2", EmailClassification.Safe);
+        var assuntoSeguro1 = SeedEmail("msg-safe-1", EmailClassification.Safe).Subject;
+        var assuntoSeguro2 = SeedEmail("msg-safe-2", EmailClassification.Safe).Subject;
 
         var token = await GetAuthTokenAsync();
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/emails/by-classification/safe");
+        // take alto: outros testes desta classe também gravam e-mails seguros ao classificar
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/emails/by-classification/safe?take=100");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var response = await _client.SendAsync(request);
@@ -135,8 +180,10 @@ public class EmailsControllerTests : IClassFixture<CustomWebApplicationFactory>
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadFromJsonAsync<JsonElement>();
         var emails = body.EnumerateArray().ToList();
-        Assert.Equal(2, emails.Count);
         Assert.All(emails, e => Assert.Equal("safe", e.GetProperty("classification").GetString()));
+        var assuntos = emails.Select(e => e.GetProperty("subject").GetString()).ToList();
+        Assert.Contains(assuntoSeguro1, assuntos);
+        Assert.Contains(assuntoSeguro2, assuntos);
     }
 
     [Fact]
