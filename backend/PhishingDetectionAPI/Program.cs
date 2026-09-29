@@ -72,6 +72,7 @@ try
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<IEmailIntegrationService, EmailIntegrationService>();
+    builder.Services.AddScoped<IEmailQueryService, EmailQueryService>();
 
     // Registrar cliente Refit para o microserviço Python de ML
     var mlServiceBaseUrl = builder.Configuration["MlServiceSettings:BaseUrl"]

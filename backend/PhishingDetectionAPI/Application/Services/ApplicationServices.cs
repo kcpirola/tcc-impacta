@@ -244,6 +244,31 @@ public class EmailClassificationService : IEmailClassificationService
 }
 
 /// <summary>
+/// Serviço de consulta de e-mails já processados.
+/// Usado pelo dashboard e relatórios para listar e-mails por classificação.
+/// </summary>
+public class EmailQueryService : IEmailQueryService
+{
+    private readonly IEmailRepository _emailRepository;
+    private readonly IMapper _mapper;
+
+    public EmailQueryService(IEmailRepository emailRepository, IMapper mapper)
+    {
+        _emailRepository = emailRepository ?? throw new ArgumentNullException(nameof(emailRepository));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+    }
+
+    /// <summary>Obtém e-mails já processados por classificação, com paginação.</summary>
+    public async Task<List<EmailDto>> GetByClassificationAsync(
+        EmailClassification classification, int skip = 0, int take = 10)
+    {
+        var emails = await _emailRepository.GetByClassificationAsync(
+            classification, Math.Max(0, skip), Math.Clamp(take, 1, 100));
+        return _mapper.Map<List<EmailDto>>(emails);
+    }
+}
+
+/// <summary>
 /// Serviço de integração com e-mail.
 /// Responsável por conexão IMAP/SMTP e recuperação de e-mails.
 /// </summary>
