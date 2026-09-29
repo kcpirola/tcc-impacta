@@ -121,6 +121,36 @@ el("dashboard").addEventListener("click", () => {
   chrome.tabs.create({ url: `${PAINEL_URL}/dashboard` });
 });
 
+// O Chrome fecha o popup sempre que ele perde o foco, e nao ha como evitar isso.
+// Por isso o texto colado a mao e guardado a cada tecla e devolvido na reabertura.
+// Fica em storage.session: vive na memoria e desaparece ao fechar o navegador,
+// para o conteudo do e-mail nao ficar gravado em disco.
+const CAMPOS_RASCUNHO = ["m-remetente", "m-assunto", "m-corpo"];
+
+async function salvarRascunho() {
+  const rascunho = { aberto: el("modo-manual").open };
+  for (const id of CAMPOS_RASCUNHO) rascunho[id] = el(id).value;
+  await chrome.storage.session.set({ rascunho });
+}
+
+async function restaurarRascunho() {
+  const { rascunho } = await chrome.storage.session.get("rascunho");
+  if (!rascunho) return;
+
+  for (const id of CAMPOS_RASCUNHO) el(id).value = rascunho[id] ?? "";
+  el("modo-manual").open = rascunho.aberto || CAMPOS_RASCUNHO.some((id) => el(id).value !== "");
+}
+
+async function descartarRascunho() {
+  for (const id of CAMPOS_RASCUNHO) el(id).value = "";
+  await chrome.storage.session.remove("rascunho");
+}
+
+for (const id of CAMPOS_RASCUNHO) {
+  el(id).addEventListener("input", salvarRascunho);
+}
+el("modo-manual").addEventListener("toggle", salvarRascunho);
+
 async function lerEmailDaAba() {
   const [aba] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!aba?.id) return null;
@@ -181,7 +211,7 @@ async function analisar(email) {
         'ou use "Nao achou o e-mail? Cole aqui".'
     );
     el("modo-manual").open = true;
-    return;
+    return false;
   }
 
   el("carregando").hidden = false;
@@ -191,23 +221,28 @@ async function analisar(email) {
   if (!resposta?.ok) {
     mostrarErro(resposta?.erro || "Nao foi possivel analisar o e-mail.");
     if (resposta?.precisaLogin) await pintarTela();
-    return;
+    return false;
   }
 
   exibirResultado(resposta.resultado);
+  return true;
 }
 
 el("analisar").addEventListener("click", async () => {
   analisar(await lerEmailDaAba());
 });
 
-el("analisar-manual").addEventListener("click", () => {
-  analisar({
+el("analisar-manual").addEventListener("click", async () => {
+  const analisou = await analisar({
     sender: el("m-remetente").value.trim(),
     subject: el("m-assunto").value.trim(),
     body: el("m-corpo").value.trim(),
     recipients: ""
   });
+
+  // Só descarta o rascunho depois de a análise dar certo; se falhar, o texto continua lá.
+  if (analisou) await descartarRascunho();
 });
 
 pintarTela();
+restaurarRascunho();
