@@ -82,6 +82,11 @@ SE ALGO DER ERRADO
    Abra o e-mail por inteiro e tente de novo. Se continuar, use a opcao
    "Nao achou o e-mail? Cole aqui" e cole remetente, assunto e o texto.
 
+A janela da extensao fecha quando clico fora
+   Isso e do proprio Chrome: a janelinha sempre fecha ao perder o foco.
+   O texto que voce colou nao se perde, fica guardado e reaparece quando
+   voce abre a extensao de novo.
+
 "Nao foi possivel falar com o servidor"
    Voce precisa estar na rede da empresa (ou conectado na VPN).
    Se estiver e o erro continuar, avise o TI: o servidor pode estar desligado.
