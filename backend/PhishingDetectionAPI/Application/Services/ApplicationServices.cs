@@ -153,11 +153,16 @@ public class AuditService : IAuditService
 public class EmailClassificationService : IEmailClassificationService
 {
     private readonly IMlServiceClient _mlServiceClient;
+    private readonly IEmailRepository _emailRepository;
     private readonly ILogger<EmailClassificationService> _logger;
 
-    public EmailClassificationService(IMlServiceClient mlServiceClient, ILogger<EmailClassificationService> logger)
+    public EmailClassificationService(
+        IMlServiceClient mlServiceClient,
+        IEmailRepository emailRepository,
+        ILogger<EmailClassificationService> logger)
     {
         _mlServiceClient = mlServiceClient ?? throw new ArgumentNullException(nameof(mlServiceClient));
+        _emailRepository = emailRepository ?? throw new ArgumentNullException(nameof(emailRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -176,7 +181,9 @@ public class EmailClassificationService : IEmailClassificationService
             };
 
             var result = await _mlServiceClient.ClassifyAsync(mlRequest);
-            return MapToClassificationResponse(result);
+            var response = MapToClassificationResponse(result);
+            await GuardarAnaliseAsync(request, response);
+            return response;
         }
         catch (Exception ex)
         {
@@ -209,7 +216,14 @@ public class EmailClassificationService : IEmailClassificationService
             }).ToList();
 
             var results = await _mlServiceClient.ClassifyBatchAsync(mlRequests);
-            return results.Select(MapToClassificationResponse).ToList();
+            var responses = results.Select(MapToClassificationResponse).ToList();
+
+            for (var i = 0; i < responses.Count && i < requests.Count; i++)
+            {
+                await GuardarAnaliseAsync(requests[i], responses[i]);
+            }
+
+            return responses;
         }
         catch (Exception ex)
         {
@@ -222,6 +236,59 @@ public class EmailClassificationService : IEmailClassificationService
                 SuspiciousUrls = new List<string>(),
                 Recommendation = "Não foi possível classificar automaticamente. Revise manualmente."
             }).ToList();
+        }
+    }
+
+    /// <summary>
+    /// Grava o e-mail analisado, para alimentar o dashboard e os relatórios.
+    /// Uma falha aqui não invalida a análise já feita, então é registrada e engolida.
+    /// </summary>
+    private async Task GuardarAnaliseAsync(ClassifyEmailRequest request, ClassificationResponse resposta)
+    {
+        if (!Enum.TryParse<EmailClassification>(resposta.Classification, ignoreCase: true, out var classificacao))
+        {
+            _logger.LogWarning("Classificação desconhecida '{Classificacao}'; e-mail não foi gravado",
+                resposta.Classification);
+            return;
+        }
+
+        try
+        {
+            var email = new Email
+            {
+                // O schema exige message_id único e a extensão não fornece o do servidor de e-mail.
+                MessageId = $"local-{Guid.NewGuid():N}",
+                Subject = request.Subject,
+                Sender = request.Sender,
+                Recipients = request.Recipients ?? string.Empty,
+                EmailBody = request.Body,
+                EmailHeaders = request.Headers ?? string.Empty,
+                ReceivedDate = DateTime.UtcNow,
+                ProcessedDate = DateTime.UtcNow,
+                Classification = classificacao,
+                Confidence = resposta.Confidence
+            };
+
+            foreach (var indicador in resposta.Indicators)
+            {
+                email.Indicators.Add(new PhishingIndicator
+                {
+                    IndicatorType = indicador.Type,
+                    IndicatorValue = indicador.Description,
+                    RiskScore = indicador.RiskScore
+                });
+            }
+
+            foreach (var url in resposta.SuspiciousUrls)
+            {
+                email.UrlsDetected.Add(new UrlDetected { Url = url, IsSuspicious = true });
+            }
+
+            await _emailRepository.AddAsync(email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao gravar o e-mail de {Sender} após a classificação", request.Sender);
         }
     }
 
@@ -265,6 +332,17 @@ public class EmailQueryService : IEmailQueryService
         var emails = await _emailRepository.GetByClassificationAsync(
             classification, Math.Max(0, skip), Math.Clamp(take, 1, 100));
         return _mapper.Map<List<EmailDto>>(emails);
+    }
+
+    /// <summary>Conta os e-mails já processados em cada classificação.</summary>
+    public async Task<EmailStatisticsDto> GetStatisticsAsync()
+    {
+        return new EmailStatisticsDto
+        {
+            Safe = await _emailRepository.CountByClassificationAsync(EmailClassification.Safe),
+            Suspicious = await _emailRepository.CountByClassificationAsync(EmailClassification.Suspicious),
+            Phishing = await _emailRepository.CountByClassificationAsync(EmailClassification.Phishing)
+        };
     }
 }
 

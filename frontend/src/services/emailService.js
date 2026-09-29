@@ -31,6 +31,15 @@ export async function submitFeedback(emailId, feedback) {
 }
 
 /**
+ * Busca os totais de e-mails por classificação.
+ * @returns {Promise<{safe: number, suspicious: number, phishing: number, total: number}>}
+ */
+export async function getStatistics() {
+  const { data } = await api.get("/emails/statistics");
+  return data;
+}
+
+/**
  * Busca e-mails por classificação com paginação.
  * @param {"safe"|"suspicious"|"phishing"} classification
  * @param {number} skip

@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import StatCard from "../components/StatCard";
 import EmailTable from "../components/EmailTable";
-import { getEmailsByClassification, submitFeedback } from "../services/emailService";
+import { getEmailsByClassification, getStatistics, submitFeedback } from "../services/emailService";
 import "./DashboardPage.css";
 
-const CLASSIFICATIONS = ["safe", "suspicious", "phishing"];
-
 export default function DashboardPage() {
-  const [emailsByClassification, setEmailsByClassification] = useState({
-    safe: [],
-    suspicious: [],
-    phishing: [],
-  });
+  const [statistics, setStatistics] = useState({ safe: 0, suspicious: 0, phishing: 0 });
+  const [recentPhishing, setRecentPhishing] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -23,14 +18,13 @@ export default function DashboardPage() {
     setLoading(true);
     setError("");
     try {
-      const results = await Promise.all(
-        CLASSIFICATIONS.map((classification) => getEmailsByClassification(classification, 0, 10))
-      );
-      setEmailsByClassification({
-        safe: results[0],
-        suspicious: results[1],
-        phishing: results[2],
-      });
+      // Os cartões vêm da contagem no banco; a tabela, da primeira página de phishing.
+      const [stats, phishing] = await Promise.all([
+        getStatistics(),
+        getEmailsByClassification("phishing", 0, 10),
+      ]);
+      setStatistics(stats);
+      setRecentPhishing(phishing);
     } catch (err) {
       setError("Não foi possível carregar os dados do dashboard.");
     } finally {
@@ -47,8 +41,6 @@ export default function DashboardPage() {
     }
   }
 
-  const recentPhishing = emailsByClassification.phishing;
-
   return (
     <div className="dashboard-page">
       <h1>Dashboard</h1>
@@ -56,9 +48,9 @@ export default function DashboardPage() {
       {error && <div className="dashboard-error">{error}</div>}
 
       <div className="dashboard-stats">
-        <StatCard title="E-mails Seguros" value={emailsByClassification.safe.length} variant="safe" />
-        <StatCard title="E-mails Suspeitos" value={emailsByClassification.suspicious.length} variant="suspicious" />
-        <StatCard title="E-mails Phishing" value={emailsByClassification.phishing.length} variant="phishing" />
+        <StatCard title="E-mails Seguros" value={statistics.safe} variant="safe" />
+        <StatCard title="E-mails Suspeitos" value={statistics.suspicious} variant="suspicious" />
+        <StatCard title="E-mails Phishing" value={statistics.phishing} variant="phishing" />
       </div>
 
       <section className="dashboard-section">

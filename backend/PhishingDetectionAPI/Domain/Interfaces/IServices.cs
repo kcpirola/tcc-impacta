@@ -55,6 +55,10 @@ public interface IEmailQueryService
     /// <param name="take">Número de registros a retornar.</param>
     /// <returns>Lista de e-mails com a classificação especificada.</returns>
     Task<List<EmailDto>> GetByClassificationAsync(EmailClassification classification, int skip = 0, int take = 10);
+
+    /// <summary>Conta os e-mails já processados em cada classificação.</summary>
+    /// <returns>Totais por classificação.</returns>
+    Task<EmailStatisticsDto> GetStatisticsAsync();
 }
 
 /// <summary>
